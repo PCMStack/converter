@@ -11,6 +11,26 @@ This package converts Pro Cycling Manager CDB binary database files to and from 
 - Low-level binary format handling lives in [src/reader.ts](src/reader.ts), [src/writer.ts](src/writer.ts), [src/types.ts](src/types.ts), and [src/tableMetadata.ts](src/tableMetadata.ts).
 - Compression helpers live in [src/compression.ts](src/compression.ts).
 
+### Terminology
+
+Three words, deliberately not interchangeable:
+
+- **CDB** — Cyanide's binary database format, the `.cdb` file. This is what the
+  library reads and writes, and it is always handled as a *buffer*, never a path:
+  the public API takes `cdbBuffer` / returns `Uint8Array`, and only the CLI in
+  [src/cli.ts](src/cli.ts) ever touches the filesystem. The format internals live
+  in [src/reader.ts](src/reader.ts), [src/writer.ts](src/writer.ts),
+  [src/compression.ts](src/compression.ts) and [src/tableMetadata.ts](src/tableMetadata.ts).
+- **database** — on its own, always the *SQLite* side: a `sql.js` `Database`
+  instance (aliased `SqlDatabase`) or the `.sqlite` file it exports to. Never use
+  it bare for a `.cdb`; say "CDB" or "CDB database" when that is what you mean.
+- **save** — a `.cdb` the *game itself wrote* as the player played, as opposed to
+  an official release or a community update. Nothing in the conversion path cares
+  about the difference, so this word belongs only where the provenance is the
+  actual point: the reverse-engineering notes in
+  [src/keyInference.ts](src/keyInference.ts) and [src/tableMetadata.ts](src/tableMetadata.ts)
+  ("observed in real saves"). Do not use it as a generic name for the input file.
+
 ## Commands
 
 - Install: `npm install`
