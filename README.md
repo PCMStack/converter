@@ -1,7 +1,7 @@
 # cdb-converter
 
 [![npm version](https://img.shields.io/npm/v/cdb-converter.svg)](https://www.npmjs.com/package/cdb-converter)
-[![CI](https://github.com/mpicciolli/cdb-converter/actions/workflows/ci.yml/badge.svg)](https://github.com/mpicciolli/cdb-converter/actions/workflows/ci.yml)
+[![CI](https://github.com/PCMStack/converter/actions/workflows/ci.yml/badge.svg)](https://github.com/PCMStack/converter/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/npm/l/cdb-converter.svg)](./LICENSE)
 [![Node.js](https://img.shields.io/node/v/cdb-converter.svg)](https://nodejs.org)
 
@@ -83,10 +83,10 @@ npx cdb-converter --version
 | `.cdb`            | CDB → SQLite | `<input>.sqlite` |
 | `.sqlite` / `.db` | SQLite → CDB | `<input>.cdb`    |
 
-| Option              | Effect                                                                                             |
-| ------------------- | -------------------------------------------------------------------------------------------------- |
+| Option              | Effect                                                                                                                      |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | `-n`, `--normalize` | (CDB → SQLite only) reconstruct PK/FK constraints from PCM naming conventions. See [Normalized schema](#normalized-schema). |
-| `--index-fk`        | Implies `--normalize`; also indexes every FK column for faster JOINs (roughly doubles output size). |
+| `--index-fk`        | Implies `--normalize`; also indexes every FK column for faster JOINs (roughly doubles output size).                         |
 
 ## Library usage
 
@@ -269,11 +269,11 @@ A full `cdb → sqlite → cdb` round-trip on a real ~60k-row database stays wel
 
 Normalization is opt-in and costs only what you ask for (measured against the default conversion, ~60k rows):
 
-| Mode                                          | Conversion time | Output size |
-| --------------------------------------------- | --------------- | ----------- |
-| Default (flat)                                | baseline        | baseline    |
-| `normalize`                                   | +~10%           | +~40%       |
-| `normalize` + `indexForeignKeys`              | +~40%           | +~130%      |
+| Mode                             | Conversion time | Output size |
+| -------------------------------- | --------------- | ----------- |
+| Default (flat)                   | baseline        | baseline    |
+| `normalize`                      | +~10%           | +~40%       |
+| `normalize` + `indexForeignKeys` | +~40%           | +~130%      |
 
 See **[bench/README.md](bench/README.md)** for the full per-fixture numbers, the bundle breakdown, and how to reproduce them (`npm run bench`).
 
