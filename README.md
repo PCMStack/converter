@@ -7,7 +7,7 @@
 
 Convert **Pro Cycling Manager CDB** database files to and from SQLite, straight from the command line or your own code. Lightweight, isomorphic (Node.js **and** the browser), and zero-configuration.
 
-The conversion is **lossless**: a full `cdb → sqlite → cdb` round-trip preserves every table, column, data type, and flag — so you can edit a save in any SQLite tool and load it back into the game. Optionally, it can reconstruct the save's relationships as real `PRIMARY KEY` / `FOREIGN KEY` constraints, turning the export into a normalized database you can explore with JOINs and ER-diagram tools.
+The conversion is **lossless**: a full `cdb → sqlite → cdb` round-trip preserves every table, column, data type, and flag — so you can edit a database in any SQLite tool and load it back into the game. Optionally, it can reconstruct the database relationships as real `PRIMARY KEY` / `FOREIGN KEY` constraints, turning the export into a normalized database you can explore with JOINs and ER-diagram tools.
 
 > [!NOTE]
 > Based on [agfor/pcmdbedit](https://github.com/agfor/pcmdbedit/) — many thanks to agfor for the foundational work.
@@ -53,7 +53,7 @@ npm install cdb-converter
 The fastest way to try it is the CLI:
 
 ```bash
-npx cdb-converter save.cdb
+npx cdb-converter database.cdb
 ```
 
 ## Command line
@@ -61,17 +61,17 @@ npx cdb-converter save.cdb
 The package ships a `cdb-converter` command. The conversion direction is auto-detected from the input file extension.
 
 ```bash
-# CDB → SQLite (default output: save.sqlite)
-npx cdb-converter save.cdb
+# CDB → SQLite (default output: database.sqlite)
+npx cdb-converter database.cdb
 
-# SQLite → CDB (default output: save.cdb)
-npx cdb-converter save.sqlite
+# SQLite → CDB (default output: database.cdb)
+npx cdb-converter database.sqlite
 
 # Provide an explicit output path (directories are created as needed)
-npx cdb-converter save.cdb data/save.sqlite
+npx cdb-converter database.cdb data/database.sqlite
 
 # Reconstruct PRIMARY KEY / FOREIGN KEY constraints (CDB → SQLite only)
-npx cdb-converter save.cdb save.sqlite --normalize
+npx cdb-converter database.cdb database.sqlite --normalize
 
 # Help / version
 npx cdb-converter --help
@@ -100,7 +100,7 @@ import { cdbToSql } from "cdb-converter";
 const SQL = await initSqlJs();
 
 // Read and convert a CDB file
-const cdbBuffer = fs.readFileSync("save.cdb");
+const cdbBuffer = fs.readFileSync("database.cdb");
 const db = cdbToSql(cdbBuffer, SQL);
 
 // Query it like any SQLite database
@@ -108,7 +108,7 @@ const result = db.exec("SELECT * FROM Teams LIMIT 5");
 console.log(result[0].values);
 
 // Export to a .sqlite file
-fs.writeFileSync("save.sqlite", db.export());
+fs.writeFileSync("database.sqlite", db.export());
 ```
 
 > [!IMPORTANT]
@@ -154,11 +154,11 @@ import { sqlToCdb } from "cdb-converter";
 const SQL = await initSqlJs();
 
 // Load a SQLite database and convert back to CDB
-const sqliteBuffer = fs.readFileSync("save.sqlite");
+const sqliteBuffer = fs.readFileSync("database.sqlite");
 const db = new SQL.Database(sqliteBuffer);
 
 const cdbBuffer = sqlToCdb(db); // automatically compressed
-fs.writeFileSync("save.cdb", Buffer.from(cdbBuffer));
+fs.writeFileSync("database.cdb", Buffer.from(cdbBuffer));
 ```
 
 ### Compression
