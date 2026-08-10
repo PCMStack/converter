@@ -41,9 +41,11 @@ async function convertFile() {
 
 	const startedAt = performance.now();
 	try {
+		// sql.js resolves its .wasm relative to this callback, not to the script
+		// URL, so it has to be pointed at the vendored copy explicitly.
 		const SQL = await initSqlJs({
 			locateFile: (filename) =>
-				`https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/${filename}`,
+				new URL(`./vendor/${filename}`, import.meta.url).href,
 		});
 		const cdbBuffer = await file.arrayBuffer();
 		const db = cdbToSql(new Uint8Array(cdbBuffer), SQL);

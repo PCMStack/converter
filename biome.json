@@ -10,6 +10,12 @@
 		"enabled": false
 	},
 	"files": {
-		"includes": ["**", "!dist", "!node_modules", "!coverage"]
+		"includes": [
+			"**",
+			"!dist",
+			"!node_modules",
+			"!coverage",
+			"!samples/browser/vendor"
+		]
 	}
 }
