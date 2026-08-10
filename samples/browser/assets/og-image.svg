@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="cdb-converter, a PCMStack tool: convert any Pro Cycling Manager database to SQLite">
+	<defs>
+		<pattern id="dots" width="28" height="28" patternUnits="userSpaceOnUse">
+			<circle cx="2.6" cy="2.6" r="2.6" fill="#e9e2d2" />
+		</pattern>
+		<linearGradient id="sunset" x1="0" y1="0" x2="1" y2="0">
+			<stop offset="0" stop-color="#ff9d2e" />
+			<stop offset="0.55" stop-color="#ff5d5d" />
+			<stop offset="1" stop-color="#e5484d" />
+		</linearGradient>
+	</defs>
+
+	<!-- paper base -->
+	<rect width="1200" height="630" fill="#fcfaf6" />
+	<rect width="1200" height="630" fill="url(#dots)" />
+	<rect x="0" y="0" width="1200" height="14" fill="url(#sunset)" />
+
+	<!-- brand mark -->
+	<g transform="translate(80, 64)">
+		<rect x="2" y="2" width="60" height="60" rx="15" fill="#ffd21e" stroke="#161513" stroke-width="4" />
+		<text x="32" y="47" font-family="'Space Mono', 'Courier New', monospace" font-size="31" font-weight="700" text-anchor="middle" fill="#161513" letter-spacing="-1.4">P/</text>
+	</g>
+	<text x="160" y="105" font-family="'Space Mono', 'Courier New', monospace" font-size="22" font-weight="700" letter-spacing="3.1" fill="#161513">PCMSTACK</text>
+
+	<!-- title cartouche -->
+	<rect x="90" y="200" width="620" height="112" rx="10" fill="#161513" />
+	<rect x="80" y="190" width="620" height="112" rx="10" fill="#ffd21e" stroke="#161513" stroke-width="4" />
+	<text x="112" y="266" font-family="'Archivo Expanded', 'Archivo', system-ui, sans-serif" font-size="52" font-weight="900" letter-spacing="-0.5" fill="#161513">cdb-converter</text>
+
+	<!-- copy -->
+	<text x="82" y="374" font-family="'Space Grotesk', system-ui, sans-serif" font-size="33" font-weight="600" fill="#24221e">Convert any Pro Cycling Manager</text>
+	<text x="82" y="418" font-family="'Space Grotesk', system-ui, sans-serif" font-size="33" font-weight="600" fill="#24221e">database to SQLite, in one line.</text>
+	<text x="82" y="470" font-family="'Space Grotesk', system-ui, sans-serif" font-size="24" font-weight="400" fill="#5e594f">Career saves, official releases, community updates.</text>
+
+	<!-- terminal panel -->
+	<rect x="748" y="178" width="380" height="292" rx="12" fill="#f5b800" />
+	<rect x="740" y="170" width="380" height="292" rx="12" fill="#161513" stroke="#161513" stroke-width="4" />
+	<circle cx="768" cy="198" r="6" fill="#ff5d5d" />
+	<circle cx="790" cy="198" r="6" fill="#ffd21e" />
+	<circle cx="812" cy="198" r="6" fill="#2fb984" />
+	<g font-family="'Space Mono', 'Courier New', monospace" font-size="15">
+		<text x="764" y="252" fill="#ffd21e">$<tspan fill="#f2ecdf" xml:space="preserve"> npx cdb-converter db.cdb</tspan></text>
+		<text x="764" y="288" fill="#8a8375">reading CDB…</text>
+		<text x="764" y="316" fill="#2fb984">✓<tspan fill="#f2ecdf" xml:space="preserve"> 232 tables</tspan></text>
+		<text x="764" y="344" fill="#2fb984">✓<tspan fill="#f2ecdf" xml:space="preserve"> 61,480 rows</tspan></text>
+		<text x="764" y="372" fill="#2fb984">✓<tspan fill="#f2ecdf" xml:space="preserve"> lossless round-trip</tspan></text>
+		<text x="764" y="412" fill="#ff7a6b">→<tspan fill="#ffd21e" xml:space="preserve"> db.sqlite</tspan></text>
+	</g>
+
+	<!-- footer strip -->
+	<line x1="80" y1="524" x2="1120" y2="524" stroke="#e9e2d2" stroke-width="2" />
+	<g font-family="'Space Mono', 'Courier New', monospace" font-size="19" font-weight="700" letter-spacing="1.6">
+		<text x="80" y="566" fill="#e5484d">.CDB → .SQLITE</text>
+		<text x="1120" y="566" text-anchor="end" fill="#5e594f">RUNS IN YOUR BROWSER</text>
+	</g>
+</svg>
