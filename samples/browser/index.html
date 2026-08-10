@@ -141,13 +141,50 @@
 <span class="token--keyword">const</span> rows = db.exec(<span class="token--string">"SELECT * FROM DYN_Cyclist LIMIT 5"</span>)
 <span class="token--keyword">const</span> sqliteBytes = db.export()</code></pre>
 			</section>
-			<footer>
-				<nav class="footer__nav">
-					<a class="footer__link" href="https://github.com/PCMStack/converter" rel="noopener noreferrer" target="_blank">GitHub</a>
-					<a class="footer__link" href="https://github.com/PCMStack/converter/blob/main/LICENSE" rel="noopener noreferrer" target="_blank">License</a>
-				</nav>
-			</footer>
 		</main>
+
+		<footer class="site-footer">
+			<div class="site-footer__inner">
+				<p class="section__label">The rest of the stack</p>
+				<p class="site-footer__lede">
+					PCMStack is a set of open source tools for Pro Cycling Manager.
+					<a href="https://pcmstack.com">pcmstack.com</a>
+				</p>
+
+				<ul class="stack-list">
+					<li class="stack-list__item stack-list__item--current">
+						<p class="stack-list__name">cdb-converter <span class="stack-list__tag">you are here</span></p>
+						<p class="stack-list__desc">
+							Convert any PCM database between <code>.cdb</code> and SQLite, from the
+							CLI or your own code.
+						</p>
+						<p class="stack-list__links">
+							<a href="https://github.com/PCMStack/converter">GitHub</a>
+							<a href="https://www.npmjs.com/package/cdb-converter">npm</a>
+							<a href="https://github.com/PCMStack/converter/blob/main/LICENSE">License</a>
+						</p>
+					</li>
+					<li class="stack-list__item">
+						<p class="stack-list__name">pcm-mcp</p>
+						<p class="stack-list__desc">
+							An MCP server that lets you question your database in plain language
+							from Claude, ChatGPT or Gemini.
+						</p>
+						<p class="stack-list__links">
+							<a href="https://github.com/PCMStack/mcp">GitHub</a>
+							<a href="https://www.npmjs.com/package/pcm-mcp">npm</a>
+						</p>
+					</li>
+					<li class="stack-list__item">
+						<p class="stack-list__name">editor <span class="stack-list__tag stack-list__tag--soon">in design</span></p>
+						<p class="stack-list__desc">
+							A web editor for PCM databases. Still being designed: there is nothing
+							to install yet.
+						</p>
+					</li>
+				</ul>
+			</div>
+		</footer>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/sql-wasm.js"></script>
 		<script type="module" src="./app.js"></script>
 	</body>

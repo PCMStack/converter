@@ -8,6 +8,121 @@ body {
 	background: var(--pico-background-color);
 }
 
+/* ---------- Site chrome: the path back to the rest of PCMStack ---------- */
+
+.site-header {
+	border-bottom: 1px solid var(--pico-muted-border-color);
+}
+
+.site-header__inner {
+	max-width: 760px;
+	margin: 0 auto;
+	padding: 0.75rem 1.5rem;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.brand {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	text-decoration: none;
+}
+
+.brand__mark {
+	display: block;
+	width: 28px;
+	height: 28px;
+}
+
+.brand__name {
+	font-weight: 700;
+}
+
+.brand__sep,
+.brand__tool {
+	color: var(--pico-muted-color);
+	font-family: var(--pico-font-family-monospace);
+	font-size: 14px;
+}
+
+.site-footer {
+	border-top: 1px solid var(--pico-muted-border-color);
+	margin-top: 3rem;
+}
+
+.site-footer__inner {
+	max-width: 760px;
+	margin: 0 auto;
+	padding: 2.5rem 1.5rem 3rem;
+}
+
+.site-footer__lede {
+	font-size: 14px;
+	color: var(--pico-muted-color);
+	margin-bottom: 1.5rem;
+}
+
+.stack-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: grid;
+	gap: 1rem;
+	grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+}
+
+.stack-list__item {
+	padding: 14px 16px;
+	border: 1px solid var(--pico-muted-border-color);
+	border-radius: var(--pico-border-radius);
+}
+
+.stack-list__name {
+	font-family: var(--pico-font-family-monospace);
+	font-weight: 700;
+	font-size: 14px;
+	margin-bottom: 0.35rem;
+}
+
+.stack-list__tag {
+	font-size: 10px;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	color: var(--pico-muted-color);
+	font-weight: 400;
+}
+
+.stack-list__desc {
+	font-size: 13px;
+	color: var(--pico-muted-color);
+	margin-bottom: 0.6rem;
+}
+
+.stack-list__links {
+	display: flex;
+	gap: 14px;
+	flex-wrap: wrap;
+	font-size: 13px;
+	margin: 0;
+}
+
+.privacy-note {
+	font-size: 13px;
+	color: var(--pico-muted-color);
+	margin-bottom: 0.75rem;
+}
+
+.page-header__eyebrow {
+	font-family: var(--pico-font-family-monospace);
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	margin-bottom: 0.5rem;
+}
+
 .demo {
 	max-width: 760px;
 	margin: 0 auto;
@@ -324,36 +439,6 @@ progress {
 }
 
 .token--comment {
-	color: var(--pico-muted-color);
-}
-
-footer {
-	text-align: center;
-	padding: 2rem 0 1rem;
-	border-top: 1px solid var(--pico-muted-border-color);
-	margin-top: 1rem;
-}
-
-.footer__nav {
-	display: flex;
-	justify-content: center;
-	gap: 24px;
-	flex-wrap: wrap;
-}
-
-.footer__link {
-	font-size: 13px;
-	color: var(--pico-muted-color);
-	text-decoration: none;
-}
-
-.footer__link:hover {
-	color: var(--pico-color);
-}
-
-.footer__license {
-	display: block;
-	margin-top: 0.75rem;
 	color: var(--pico-muted-color);
 }
 
