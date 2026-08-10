@@ -1,54 +1,226 @@
+/* ============================================================
+   PCMStack webfonts, same source and same set as pcmstack.com.
+   - Archivo Expanded : chunky expanded race-poster display
+   - Space Grotesk    : UI + body sans
+   - Space Mono       : monospace, code, labels, terminal accents
+   `display=swap` so text paints in the fallback immediately: no FOIT.
+   ============================================================ */
+@import url("https://fonts.googleapis.com/css2?family=Archivo+Expanded:wght@600;700;800;900&family=Archivo:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap");
+
+/* ============================================================
+   PCMStack design tokens, "Maillot Jaune x Terminal Sunset".
+   Values are copied from the design system in
+   pcmstack.com's src/styles/global.css. Only the subset this
+   page uses is declared here.
+   ============================================================ */
 :root {
+	--font-display: "Archivo Expanded", "Archivo", system-ui, sans-serif;
+	--font-sans: "Space Grotesk", system-ui, -apple-system, sans-serif;
+	--font-mono: "Space Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+	--sun-100: #fff3c2;
+	--sun-200: #ffe888;
+	--sun-300: #ffdd4d;
+	--sun-400: #ffd21e;
+	--sun-500: #f5b800;
+	--sun-700: #a87400;
+
+	--orange-500: #ff9d2e;
+	--coral-400: #ff7a6b;
+	--coral-500: #ff5d5d;
+	--coral-600: #e5484d;
+	--coral-700: #c4353a;
+
+	--green-400: #2fb984;
+	--green-500: #0f9d6b;
+
+	--ink-900: #161513;
+	--ink-800: #24221e;
+	--ink-700: #3a372f;
+	--ink-500: #5e594f;
+	--ink-400: #8a8375;
+	--paper-400: #ded6c4;
+	--paper-300: #e9e2d2;
+	--paper-200: #f2ecdf;
+	--paper-100: #faf6ec;
+	--paper-50: #fcfaf6;
+	--white: #ffffff;
+
+	/* Semantic aliases */
+	--bg-page: var(--paper-50);
+	--bg-inset: var(--paper-200);
+	--surface-card: var(--white);
+	--surface-tinted: var(--paper-100);
+	--surface-ink: var(--ink-900);
+	--surface-brand: var(--sun-400);
+
+	--text-strong: var(--ink-900);
+	--text-body: var(--ink-800);
+	--text-muted: var(--ink-500);
+	--text-subtle: var(--ink-400);
+	--text-on-ink: var(--paper-100);
+
+	--brand: var(--sun-400);
+	--brand-deep: var(--sun-500);
+	--link: var(--coral-600);
+	--link-hover: var(--coral-700);
+	--positive: var(--green-500);
+
+	--border: var(--paper-300);
+	--border-strong: var(--ink-900);
+
+	--gradient-sunset: linear-gradient(
+		90deg,
+		#ff9d2e 0%,
+		#ff5d5d 55%,
+		#e5484d 100%
+	);
+
+	--focus-ring: 0 0 0 3px rgba(229, 72, 77, 0.35);
+	--texture-dots: radial-gradient(var(--paper-300) 1.3px, transparent 1.3px);
+	--texture-dots-size: 14px 14px;
+
+	--ls-label: 0.08em;
+	--ls-caps: 0.14em;
+
+	/* Poster treatment: 2px ink borders and hard offset shadows */
+	--border-hard: 2px solid var(--ink-900);
+	--shadow-hard: 4px 4px 0 var(--ink-900);
+	--shadow-hard-sm: 2px 2px 0 var(--ink-900);
+	--shadow-hard-brand: 4px 4px 0 var(--sun-500);
+}
+
+/* ============================================================
+   Pico v2 is driven through its own variables rather than by
+   rewriting the markup. Pico scopes its light palette to
+   `:root:not([data-theme=dark])`, so the mapping has to match
+   that specificity to win; `data-theme="light"` on <html> also
+   keeps the paper identity under a dark OS preference, which
+   this brand has no dark counterpart for.
+   ============================================================ */
+:root[data-theme="light"] {
+	--pico-font-family: var(--font-sans);
+	--pico-font-family-sans-serif: var(--font-sans);
+	--pico-font-family-monospace: var(--font-mono);
 	--pico-font-size: 15px;
-	--pico-font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
-	--pico-font-family-monospace: "IBM Plex Mono", "SFMono-Regular", monospace;
+	--pico-line-height: 1.55;
+
+	--pico-background-color: var(--bg-page);
+	--pico-color: var(--text-body);
+	--pico-h1-color: var(--text-strong);
+	--pico-h2-color: var(--text-strong);
+	--pico-h3-color: var(--text-strong);
+	--pico-muted-color: var(--text-muted);
+	--pico-muted-border-color: var(--border);
+
+	/* Coral carries interaction; the yellow is a surface, never text. */
+	--pico-primary: var(--link);
+	--pico-primary-hover: var(--link-hover);
+	--pico-primary-underline: rgba(229, 72, 77, 0.4);
+	--pico-primary-focus: rgba(229, 72, 77, 0.35);
+	--pico-primary-background: var(--brand);
+	--pico-primary-hover-background: var(--brand-deep);
+	--pico-primary-border: var(--border-strong);
+	--pico-primary-hover-border: var(--border-strong);
+	--pico-primary-inverse: var(--ink-900);
+
+	--pico-secondary: var(--text-muted);
+	--pico-secondary-background: var(--ink-700);
+	--pico-secondary-inverse: var(--paper-100);
+
+	--pico-card-background-color: var(--surface-card);
+	--pico-card-sectioning-background-color: var(--surface-tinted);
+	--pico-card-border-color: var(--border-strong);
+	--pico-card-box-shadow: var(--shadow-hard);
+
+	--pico-code-background-color: var(--surface-ink);
+	--pico-code-color: var(--text-on-ink);
+
+	--pico-form-element-background-color: var(--white);
+	--pico-form-element-border-color: var(--border-strong);
+	--pico-form-element-color: var(--text-body);
+	--pico-form-element-focus-color: var(--link);
+
+	--pico-progress-background-color: var(--paper-300);
+	--pico-progress-color: var(--coral-600);
+
+	--pico-ins-color: var(--green-500);
+	--pico-del-color: var(--coral-600);
+	--pico-mark-background-color: var(--sun-200);
+	--pico-mark-color: var(--ink-900);
+	--pico-blockquote-border-color: var(--brand);
+
+	--pico-border-radius: 8px;
+	--pico-border-width: 2px;
+	--pico-outline-width: 3px;
+	--pico-spacing: 1rem;
 }
 
 body {
-	background: var(--pico-background-color);
+	background-color: var(--bg-page);
+	background-image: var(--texture-dots);
+	background-size: var(--texture-dots-size);
+	background-attachment: fixed;
+}
+
+::selection {
+	background: var(--sun-300);
+	color: var(--ink-900);
 }
 
 /* ---------- Site chrome: the path back to the rest of PCMStack ---------- */
 
 .site-header {
-	border-bottom: 1px solid var(--pico-muted-border-color);
+	border-bottom: var(--border-hard);
+	background: var(--white);
 }
 
 .site-header__inner {
 	max-width: 760px;
 	margin: 0 auto;
-	padding: 0.75rem 1.5rem;
+	padding: 0.7rem 1.5rem;
 	display: flex;
 	align-items: center;
-	gap: 8px;
+	gap: 10px;
 }
 
 .brand {
 	display: inline-flex;
 	align-items: center;
-	gap: 8px;
+	gap: 9px;
 	text-decoration: none;
+	color: var(--text-strong);
 }
 
-.brand__mark {
+.brand:hover {
+	color: var(--text-strong);
+}
+
+.brand__logo {
 	display: block;
-	width: 28px;
-	height: 28px;
+	height: 30px;
+	width: auto;
+	transition: transform 0.15s ease;
 }
 
-.brand__name {
-	font-weight: 700;
+.brand:hover .brand__logo {
+	transform: translate(-1px, -1px);
 }
 
 .brand__sep,
 .brand__tool {
-	color: var(--pico-muted-color);
-	font-family: var(--pico-font-family-monospace);
-	font-size: 14px;
+	font-family: var(--font-mono);
+	font-size: 13px;
+	color: var(--text-muted);
+}
+
+.brand__sep {
+	color: var(--paper-400);
 }
 
 .site-footer {
-	border-top: 1px solid var(--pico-muted-border-color);
+	border-top: var(--border-hard);
+	background: var(--surface-tinted);
 	margin-top: 3rem;
 }
 
@@ -60,7 +232,7 @@ body {
 
 .site-footer__lede {
 	font-size: 14px;
-	color: var(--pico-muted-color);
+	color: var(--text-muted);
 	margin-bottom: 1.5rem;
 }
 
@@ -74,30 +246,60 @@ body {
 }
 
 .stack-list__item {
+	list-style: none;
 	padding: 14px 16px;
-	border: 1px solid var(--pico-muted-border-color);
+	border: var(--border-hard);
 	border-radius: var(--pico-border-radius);
+	background: var(--white);
+	box-shadow: var(--shadow-hard-sm);
+}
+
+.stack-list__item--current {
+	background: var(--sun-100);
 }
 
 .stack-list__name {
-	font-family: var(--pico-font-family-monospace);
+	font-family: var(--font-mono);
 	font-weight: 700;
 	font-size: 14px;
-	margin-bottom: 0.35rem;
+	color: var(--text-strong);
+	margin-bottom: 0.4rem;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-wrap: wrap;
 }
 
 .stack-list__tag {
+	font-family: var(--font-mono);
 	font-size: 10px;
+	font-weight: 700;
 	text-transform: uppercase;
-	letter-spacing: 0.08em;
-	color: var(--pico-muted-color);
-	font-weight: 400;
+	letter-spacing: var(--ls-label);
+	padding: 2px 7px;
+	border: 1px solid var(--ink-900);
+	border-radius: 999px;
+	background: var(--sun-400);
+	color: var(--ink-900);
+}
+
+.stack-list__tag--soon {
+	background: transparent;
+	border-color: var(--paper-400);
+	color: var(--text-subtle);
 }
 
 .stack-list__desc {
 	font-size: 13px;
-	color: var(--pico-muted-color);
+	color: var(--text-muted);
 	margin-bottom: 0.6rem;
+}
+
+.stack-list__desc code {
+	font-size: 12px;
+	padding: 1px 5px;
+	background: var(--paper-200);
+	color: var(--ink-800);
 }
 
 .stack-list__links {
@@ -105,23 +307,11 @@ body {
 	gap: 14px;
 	flex-wrap: wrap;
 	font-size: 13px;
+	font-family: var(--font-mono);
 	margin: 0;
 }
 
-.privacy-note {
-	font-size: 13px;
-	color: var(--pico-muted-color);
-	margin-bottom: 0.75rem;
-}
-
-.page-header__eyebrow {
-	font-family: var(--pico-font-family-monospace);
-	font-size: 11px;
-	font-weight: 700;
-	letter-spacing: 0.14em;
-	text-transform: uppercase;
-	margin-bottom: 0.5rem;
-}
+/* ---------- Page header ---------- */
 
 .demo {
 	max-width: 760px;
@@ -134,16 +324,39 @@ body {
 	padding: 3rem 0 2rem;
 }
 
+.page-header__eyebrow {
+	font-family: var(--font-mono);
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: var(--ls-caps);
+	text-transform: uppercase;
+	color: var(--coral-600);
+	margin-bottom: 0.9rem;
+}
+
+/* The title is a race-poster cartouche: brand yellow, hard ink border
+   and offset shadow. Same treatment as the Open Graph card. */
 .page-header__title {
-	margin-bottom: 0.25rem;
-	font-size: 2.25rem;
-	letter-spacing: -0.04em;
+	display: inline-block;
+	margin-bottom: 1.25rem;
+	padding: 0.35em 0.6em;
+	font-family: var(--font-display);
+	font-weight: 900;
+	font-size: clamp(1.6rem, 7vw, 2.6rem);
+	line-height: 1;
+	letter-spacing: -0.01em;
+	color: var(--ink-900);
+	background: var(--surface-brand);
+	border: var(--border-hard);
+	border-radius: 10px;
+	box-shadow: var(--shadow-hard);
 }
 
 .page-header__subtitle {
-	color: var(--pico-muted-color);
+	color: var(--text-body);
 	margin-bottom: 1.5rem;
-	font-size: 1rem;
+	font-size: 1.05rem;
+	font-weight: 500;
 }
 
 .badge-list {
@@ -156,138 +369,220 @@ body {
 
 .badge-list__item {
 	font-size: 11px;
-	padding: 3px 10px;
-	border-radius: 99px;
-	border: 1px solid var(--pico-muted-border-color);
-	color: var(--pico-muted-color);
-	font-family: var(--pico-font-family-monospace);
+	font-weight: 700;
+	letter-spacing: var(--ls-label);
+	padding: 3px 12px;
+	border-radius: 999px;
+	border: 2px solid var(--ink-900);
+	background: var(--white);
+	color: var(--ink-900);
+	font-family: var(--font-mono);
 }
+
+/* ---------- Install command ---------- */
 
 .install {
 	display: flex;
-	align-items: center;
+	align-items: stretch;
 	justify-content: center;
 	gap: 8px;
 	flex-wrap: wrap;
 }
 
 .install__code {
+	display: flex;
+	align-items: center;
+	font-family: var(--font-mono);
 	font-size: 14px;
-	background: var(--pico-code-background-color);
-	padding: 8px 16px;
+	background: var(--surface-ink);
+	color: var(--paper-100);
+	padding: 9px 16px;
 	border-radius: var(--pico-border-radius);
-	border: 1px solid var(--pico-muted-border-color);
+	border: var(--border-hard);
+	box-shadow: var(--shadow-hard-sm);
+}
+
+.install__code::before {
+	content: "$";
+	color: var(--sun-400);
+	margin-right: 0.6em;
 }
 
 .install__copy {
-	background: none;
-	border: 1px solid var(--pico-muted-border-color);
-	padding: 6px 10px;
+	background: var(--sun-400);
+	border: var(--border-hard);
+	padding: 6px 12px;
 	border-radius: var(--pico-border-radius);
 	cursor: pointer;
-	color: var(--pico-muted-color);
+	color: var(--ink-900);
 	display: flex;
 	align-items: center;
 	line-height: 1;
 	margin-bottom: 0;
+	box-shadow: var(--shadow-hard-sm);
+	transition:
+		transform 0.1s ease,
+		box-shadow 0.1s ease,
+		background 0.15s ease;
 }
 
 .install__copy:hover {
-	color: var(--pico-color);
-	border-color: var(--pico-color);
+	background: var(--sun-300);
+	transform: translate(-2px, -2px);
+	box-shadow: var(--shadow-hard);
 }
+
+.install__copy:active {
+	transform: translate(1px, 1px);
+	box-shadow: 0 0 0 var(--ink-900);
+}
+
+.install__copy:focus-visible {
+	outline: none;
+	box-shadow: var(--shadow-hard-sm), var(--focus-ring);
+}
+
+/* ---------- Sections ---------- */
 
 section {
 	margin: 2.5rem 0;
 }
 
 .section__label {
+	font-family: var(--font-mono);
 	font-size: 11px;
 	text-transform: uppercase;
-	letter-spacing: 0.08em;
-	color: var(--pico-muted-color);
+	letter-spacing: var(--ls-caps);
+	color: var(--coral-600);
 	margin-bottom: 0.75rem;
-	font-weight: 600;
+	font-weight: 700;
 }
 
+.privacy-note {
+	font-size: 13px;
+	color: var(--text-muted);
+	margin-bottom: 0.9rem;
+	padding-left: 12px;
+	border-left: 3px solid var(--sun-400);
+}
+
+/* ---------- Dropzone ---------- */
+
 .dropzone {
-	border: 2px dashed var(--pico-muted-border-color);
+	display: block;
+	border: 2px dashed var(--ink-400);
 	border-radius: var(--pico-border-radius);
+	background: var(--white);
 	padding: 2.5rem 1.5rem;
 	text-align: center;
 	cursor: pointer;
 	transition:
-		border-color 0.15s,
-		background 0.15s;
+		border-color 0.15s ease,
+		background 0.15s ease,
+		transform 0.1s ease,
+		box-shadow 0.1s ease;
 }
 
-.dropzone:hover,
+.dropzone:hover {
+	border-color: var(--ink-900);
+	background: var(--paper-100);
+}
+
+/* Drag-over and armed states go solid ink with the poster shadow, so the
+   drop target is unmistakable while a file is hovering over it. */
 .dropzone--over,
 .dropzone[data-has-file="true"] {
-	border-color: var(--pico-primary);
-	background: color-mix(
-		in srgb,
-		var(--pico-primary-background) 10%,
-		transparent
-	);
+	border: var(--border-hard);
+	background: var(--sun-100);
+	box-shadow: var(--shadow-hard);
+	transform: translate(-2px, -2px);
+}
+
+.dropzone--over {
+	background: var(--sun-200);
+	border-style: solid;
+}
+
+.dropzone:focus-within {
+	border-color: var(--ink-900);
+	box-shadow: var(--focus-ring);
 }
 
 .dropzone__icon {
 	display: block;
 	margin: 0 auto 0.75rem;
-	opacity: 0.35;
+	color: var(--ink-400);
 	width: 36px;
 	height: 36px;
+	transition: color 0.15s ease;
+}
+
+.dropzone--over .dropzone__icon,
+.dropzone[data-has-file="true"] .dropzone__icon {
+	color: var(--ink-900);
 }
 
 .dropzone__text {
 	margin: 0;
-	color: var(--pico-muted-color);
-	font-size: 0.9rem;
+	color: var(--text-body);
+	font-size: 0.95rem;
+	font-weight: 500;
+}
+
+.dropzone__text strong {
+	font-family: var(--font-mono);
 }
 
 .dropzone__hint {
 	font-size: 0.8rem;
-	color: var(--pico-muted-color);
-	opacity: 0.7;
+	color: var(--text-subtle);
 }
 
 .dropzone__input {
 	display: none;
 }
 
+/* ---------- Picked file ---------- */
+
 .file {
 	display: none;
 	align-items: center;
 	gap: 10px;
 	padding: 10px 14px;
-	border: 1px solid var(--pico-muted-border-color);
+	border: var(--border-hard);
 	border-radius: var(--pico-border-radius);
 	margin-top: 0.75rem;
-	background: var(--pico-card-background-color);
+	background: var(--white);
+	box-shadow: var(--shadow-hard-sm);
 }
 
 .file__chip {
-	background: color-mix(in srgb, var(--pico-primary) 12%, transparent);
-	color: var(--pico-primary);
+	background: var(--sun-400);
+	color: var(--ink-900);
 	font-size: 11px;
 	font-weight: 700;
-	padding: 4px 8px;
+	letter-spacing: var(--ls-label);
+	padding: 4px 9px;
+	border: 1px solid var(--ink-900);
 	border-radius: 6px;
-	font-family: var(--pico-font-family-monospace);
+	font-family: var(--font-mono);
 }
 
 .file__info {
 	flex: 1;
+	min-width: 0;
 }
 
 .file__name {
+	font-family: var(--font-mono);
 	font-size: 13px;
 	display: block;
+	color: var(--text-strong);
+	overflow-wrap: anywhere;
 }
 
 .file__size {
-	color: var(--pico-muted-color);
+	color: var(--text-muted);
 }
 
 progress {
@@ -299,35 +594,73 @@ progress {
 	display: none;
 	width: 100%;
 	margin-top: 0.75rem;
+	font-family: var(--font-display);
+	font-weight: 800;
+	font-size: 1rem;
+	text-transform: uppercase;
+	letter-spacing: 0.01em;
+	border: var(--border-hard);
+	box-shadow: var(--shadow-hard);
+	transition:
+		transform 0.1s ease,
+		box-shadow 0.1s ease;
 }
 
+.convert-button:hover:not(:disabled) {
+	transform: translate(-2px, -2px);
+	box-shadow: 6px 6px 0 var(--ink-900);
+}
+
+.convert-button:active:not(:disabled) {
+	transform: translate(2px, 2px);
+	box-shadow: 0 0 0 var(--ink-900);
+}
+
+/* ---------- Logs: this panel should read as a terminal ---------- */
+
 .logs {
-	margin-top: 0.75rem;
+	margin-top: 1.25rem;
 }
 
 .logs__output {
 	margin: 0;
 	min-height: 8rem;
-	padding: 15px;
+	padding: 14px 16px;
+	background: var(--surface-ink);
+	color: var(--text-on-ink);
+	font-family: var(--font-mono);
+	font-size: 13px;
+	line-height: 1.7;
+	border: var(--border-hard);
+	border-radius: var(--pico-border-radius);
+	box-shadow: var(--shadow-hard-brand);
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
 }
+
+/* ---------- Result card ---------- */
 
 .result {
 	display: none;
-	margin-top: 1rem;
+	margin-top: 1.25rem;
 }
 
 .result__body {
 	padding: 0;
 	overflow: hidden;
+	border: var(--border-hard);
+	border-radius: var(--pico-border-radius);
+	background: var(--white);
+	box-shadow: var(--shadow-hard);
 }
 
 .result__head {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	padding: 10px 16px;
-	border-bottom: 1px solid var(--pico-muted-border-color);
-	background: var(--pico-card-sectioning-background-color);
+	padding: 12px 16px;
+	border-bottom: var(--border-hard);
+	background: var(--sun-400);
 	flex-wrap: wrap;
 	gap: 8px;
 }
@@ -339,52 +672,83 @@ progress {
 }
 
 .result__stat {
+	font-family: var(--font-mono);
 	font-size: 12px;
-	color: var(--pico-muted-color);
+	color: var(--ink-700);
 }
 
 .result__stat-value {
-	color: var(--pico-color);
+	color: var(--ink-900);
+	font-weight: 700;
 }
 
 .result__download {
+	font-family: var(--font-mono);
+	font-weight: 700;
 	font-size: 12px;
-	padding: 5px 14px;
+	padding: 6px 14px;
 	margin: 0;
+	background: var(--ink-900);
+	color: var(--paper-100);
+	border: var(--border-hard);
+	box-shadow: var(--shadow-hard-sm);
+}
+
+.result__download:hover:not(:disabled) {
+	background: var(--ink-700);
+	color: var(--sun-400);
+	border-color: var(--ink-900);
 }
 
 .tabs {
 	display: flex;
 	gap: 4px;
 	padding: 8px 12px;
-	border-bottom: 1px solid var(--pico-muted-border-color);
+	border-bottom: 2px solid var(--border);
 	overflow-x: auto;
-	background: var(--pico-card-background-color);
+	background: var(--surface-tinted);
 }
 
 .tabs--empty {
 	display: block;
-	color: var(--pico-muted-color);
+	font-family: var(--font-mono);
+	color: var(--text-muted);
 	font-size: 12px;
 }
 
 .tabs__item {
+	font-family: var(--font-mono);
 	font-size: 12px;
 	padding: 4px 10px;
-	border-radius: var(--pico-border-radius);
+	border-radius: 6px;
 	cursor: pointer;
-	color: var(--pico-muted-color);
+	color: var(--text-muted);
 	background: none;
-	border: 1px solid transparent;
+	border: 2px solid transparent;
 	white-space: nowrap;
 	margin: 0;
 }
 
-.tabs__item--active {
-	background: color-mix(in srgb, var(--pico-primary) 10%, transparent);
-	border-color: var(--pico-primary-border);
-	color: var(--pico-primary);
-	font-weight: 600;
+.tabs__item:hover {
+	color: var(--ink-900);
+	background: var(--paper-200);
+}
+
+.tabs__item--active,
+.tabs__item--active:hover {
+	background: var(--sun-400);
+	border-color: var(--ink-900);
+	color: var(--ink-900);
+	font-weight: 700;
+}
+
+.preview-meta {
+	padding: 10px 16px;
+	border-bottom: 2px solid var(--border);
+	font-family: var(--font-mono);
+	font-size: 12px;
+	color: var(--text-muted);
+	background: var(--white);
 }
 
 .table-wrap {
@@ -394,52 +758,60 @@ progress {
 .table-wrap__table {
 	margin: 0;
 	font-size: 12px;
-	font-family: var(--pico-font-family-monospace);
+	font-family: var(--font-mono);
 	width: 100%;
 }
 
 .table-wrap__th {
-	color: var(--pico-muted-color);
-	font-weight: 600;
+	color: var(--text-muted);
+	font-weight: 700;
+	letter-spacing: var(--ls-label);
+	text-transform: uppercase;
+	font-size: 11px;
 	white-space: nowrap;
 }
 
 .table-wrap__td {
 	white-space: nowrap;
+	color: var(--text-body);
 }
 
 .null-value {
-	color: var(--pico-muted-color);
+	color: var(--text-subtle);
 	font-style: italic;
 }
 
-.preview-meta {
-	padding: 10px 16px;
-	border-bottom: 1px solid var(--pico-muted-border-color);
-	font-size: 12px;
-	color: var(--pico-muted-color);
-}
+/* ---------- Usage snippet ---------- */
 
-.logs__output,
 .usage-code {
+	background: var(--surface-ink);
+	color: var(--text-on-ink);
+	padding: 16px 18px;
+	border: var(--border-hard);
 	border-radius: var(--pico-border-radius);
+	box-shadow: var(--shadow-hard-brand);
+	overflow-x: auto;
 }
 
 .usage-code__code {
+	font-family: var(--font-mono);
 	font-size: 13px;
 	line-height: 1.8;
+	background: none;
+	color: inherit;
+	padding: 0;
 }
 
 .token--keyword {
-	color: var(--pico-primary);
+	color: var(--sun-400);
 }
 
 .token--string {
-	color: var(--pico-ins-color);
+	color: var(--green-400);
 }
 
 .token--comment {
-	color: var(--pico-muted-color);
+	color: var(--ink-400);
 }
 
 @media (max-width: 640px) {
@@ -447,15 +819,38 @@ progress {
 		padding-inline: 1rem;
 	}
 
+	.site-header__inner,
+	.site-footer__inner {
+		padding-inline: 1rem;
+	}
+
 	.page-header {
 		padding-top: 2.25rem;
 	}
 
-	.page-header__title {
-		font-size: 2rem;
-	}
-
 	.result__head {
 		align-items: flex-start;
+	}
+
+	.brand__tool,
+	.brand__sep {
+		font-size: 12px;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.brand__logo,
+	.dropzone,
+	.convert-button,
+	.install__copy {
+		transition: none;
+	}
+
+	.brand:hover .brand__logo,
+	.dropzone--over,
+	.dropzone[data-has-file="true"],
+	.convert-button:hover:not(:disabled),
+	.install__copy:hover {
+		transform: none;
 	}
 }

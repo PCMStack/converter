@@ -1,0 +1,6 @@
+<svg width="360" height="96" viewBox="0 0 360 96" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="PCMStack">
+  <rect x="4" y="18" width="60" height="60" rx="15" fill="#ffd21e"></rect>
+  <rect x="4" y="18" width="60" height="60" rx="15" fill="none" stroke="#161513" stroke-width="5"></rect>
+  <text x="34" y="60" font-family="'Space Mono','Courier New',monospace" font-size="30" font-weight="700" text-anchor="middle" fill="#161513" letter-spacing="-1.5">P/</text>
+  <text x="84" y="61" font-family="'Space Grotesk',system-ui,sans-serif" font-size="38" font-weight="700" letter-spacing="-1.5" fill="#161513">PCM<tspan fill="#e5484d">Stack</tspan></text>
+</svg>

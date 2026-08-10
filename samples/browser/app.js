@@ -301,7 +301,7 @@ function copyInstallCommand() {
 	const command = "npm install cdb-converter";
 	void navigator.clipboard?.writeText(command);
 	copyInstallButton.innerHTML =
-		'<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#1D9E75" stroke-width="2" aria-hidden="true"><path d="M3 8l4 4 6-6"/></svg>';
+		'<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#0f9d6b" stroke-width="2" aria-hidden="true"><path d="M3 8l4 4 6-6"/></svg>';
 	window.setTimeout(() => {
 		copyInstallButton.innerHTML =
 			'<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5" y="5" width="9" height="9" rx="2"/><path d="M3 11V3a2 2 0 0 1 2-2h8"/></svg>';

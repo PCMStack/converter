@@ -33,7 +33,12 @@ on `file://`.
 - `index.html` defines the UI
 - `app.js` initializes `sql.js`, runs `cdbToSql`, and prepares the SQLite download
 - `style.css` maps the PCMStack design tokens onto Pico's CSS variables
-- `assets/` holds the PCMStack favicon, logo mark and Open Graph card
+- `assets/` holds the PCMStack favicon, wordmark and Open Graph card
+
+The header inlines `assets/logo.svg` rather than pointing an `<img>` at it: the
+wordmark is built from live `<text>`, and an externally referenced SVG cannot
+reach the page's webfonts, so it would fall back to a system sans. The file is
+kept as the source of truth for that markup.
 - `vendor/` holds the third-party runtime dependencies, served from this origin
 
 ## Vendored dependencies

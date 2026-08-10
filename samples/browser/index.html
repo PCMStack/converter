@@ -1,8 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="auto">
+<html lang="en" data-theme="light">
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 		<title>cdb-converter: PCMStack</title>
 		<meta
 			name="description"
@@ -36,9 +38,15 @@
 	<body>
 		<header class="site-header">
 			<div class="site-header__inner">
-				<a class="brand" href="https://pcmstack.com">
-					<img class="brand__mark" src="./assets/logo-mark.svg" alt="" width="28" height="28" />
-					<span class="brand__name">PCMStack</span>
+				<!-- The wordmark is inlined rather than <img>-ed: it carries live text,
+				     and an external SVG cannot reach the page's webfonts. -->
+				<a class="brand" href="https://pcmstack.com" aria-label="PCMStack">
+					<svg class="brand__logo" viewBox="0 0 360 96" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+						<rect x="4" y="18" width="60" height="60" rx="15" fill="#ffd21e" />
+						<rect x="4" y="18" width="60" height="60" rx="15" fill="none" stroke="#161513" stroke-width="5" />
+						<text x="34" y="60" font-family="'Space Mono','Courier New',monospace" font-size="30" font-weight="700" text-anchor="middle" fill="#161513" letter-spacing="-1.5">P/</text>
+						<text x="84" y="61" font-family="'Space Grotesk',system-ui,sans-serif" font-size="38" font-weight="700" letter-spacing="-1.5" fill="#161513">PCM<tspan fill="#e5484d">Stack</tspan></text>
+					</svg>
 				</a>
 				<span class="brand__sep" aria-hidden="true">/</span>
 				<span class="brand__tool">cdb-converter</span>
