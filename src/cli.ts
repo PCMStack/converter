@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 
+import { realpathSync } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, extname, resolve } from "node:path";
 import process from "node:process";
-import { pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
 import initSqlJs from "sql.js";
 import { cdbToSql } from "./cdbToSql";
 import { sqlToCdb } from "./sqlToCdb";
@@ -241,10 +242,54 @@ export async function run(argv: string[]): Promise<void> {
 	}
 }
 
-const isDirectRun =
-	typeof process.argv[1] === "string" &&
-	import.meta.url === pathToFileURL(resolve(process.argv[1])).href;
+/**
+ * Resolve a path to its real location, tolerating paths that do not exist
+ * (realpathSync throws on those) by falling back to the resolved path.
+ */
+function safeRealpath(path: string): string {
+	try {
+		return realpathSync(path);
+	} catch {
+		return path;
+	}
+}
 
-if (isDirectRun) {
+/**
+ * Path comparison for the entry-point check. Windows paths are compared
+ * case-insensitively: the drive letter casing of argv[1] and of the module path
+ * can differ for the very same file.
+ */
+function samePath(a: string, b: string): boolean {
+	return process.platform === "win32"
+		? a.toLowerCase() === b.toLowerCase()
+		: a === b;
+}
+
+/**
+ * True when this module is the process entry point, false when it is merely
+ * imported (by the test suite, or by anything that loads the file directly),
+ * in which case importing it must not run a conversion.
+ *
+ * Both sides must be dereferenced: npm installs the bin as a symlink
+ * (node_modules/.bin/cdb-converter -> ../cdb-converter/dist/cli.mjs), and Node
+ * puts the *symlink* path in process.argv[1] while import.meta.url points at
+ * the real file. Comparing them without realpath makes the check always false,
+ * so the CLI silently does nothing when run via npx or the installed binary.
+ */
+export function isDirectRun(
+	argv1: string | undefined,
+	moduleUrl: string,
+): boolean {
+	if (typeof argv1 !== "string" || argv1.length === 0) {
+		return false;
+	}
+
+	return samePath(
+		safeRealpath(resolve(argv1)),
+		safeRealpath(fileURLToPath(moduleUrl)),
+	);
+}
+
+if (isDirectRun(process.argv[1], import.meta.url)) {
 	void run(process.argv.slice(2));
 }
