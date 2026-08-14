@@ -21,8 +21,14 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
  * run() in-process cannot observe the bug: Node reports the symlink path in
  * process.argv[1] but the real path in import.meta.url, and a comparison that
  * does not dereference both makes the CLI exit 0 without doing anything.
+ *
+ * The symlink suite is skipped on Windows: fs.symlink() there needs admin
+ * rights or developer mode, and npm does not symlink "bin" entries anyway (it
+ * generates .cmd/.ps1 shims), so the scenario under test does not exist.
  */
 
+const isWindows = process.platform === "win32";
+const npmCommand = isWindows ? "npm.cmd" : "npm";
 const repoRoot = resolve(fileURLToPath(import.meta.url), "../..");
 const cliPath = join(repoRoot, "dist", "cli.mjs");
 const fixture = join(repoRoot, "test", "fixtures", "OfficialRelease-2014.cdb");
@@ -49,15 +55,12 @@ function runCli(args: string[]): { status: number; stdout: string } {
 }
 
 beforeAll(async () => {
-	execFileSync("npm", ["run", "build"], { cwd: repoRoot, stdio: "ignore" });
+	execFileSync(npmCommand, ["run", "build"], {
+		cwd: repoRoot,
+		stdio: "ignore",
+	});
 
 	workDir = await mkdtemp(join(tmpdir(), "cdb-converter-cli-"));
-	await mkdir(join(workDir, "bin"));
-
-	// Mirrors what `npm install` creates for the "bin" entry.
-	linkPath = join(workDir, "bin", "cdb-converter");
-	await symlink(cliPath, linkPath);
-
 	await copyFile(fixture, join(workDir, "input.cdb"));
 }, 120_000);
 
@@ -67,7 +70,15 @@ afterAll(async () => {
 	}
 });
 
-describe("CLI invoked through a symlink", () => {
+describe.skipIf(isWindows)("CLI invoked through a symlink", () => {
+	beforeAll(async () => {
+		await mkdir(join(workDir, "bin"));
+
+		// Mirrors what `npm install` creates for the "bin" entry.
+		linkPath = join(workDir, "bin", "cdb-converter");
+		await symlink(cliPath, linkPath);
+	});
+
 	it("converts a real .cdb and writes the output file", () => {
 		const { status, stdout } = runCli(["input.cdb", "output.sqlite"]);
 
