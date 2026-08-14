@@ -251,13 +251,13 @@ CREATE TABLE DB_STRUCTURE (TableName '274', ID '0')
 CREATE TABLE DB_STRUCTURE (TableName TEXT '274', ID INTEGER, Flags INTEGER)
 ```
 
-Column indices and data types are encoded into each column's declared type annotation, which makes `cdb → sqlite → cdb` lossless even when the SQLite database is saved to disk and reopened in a separate process. By default, CDB's narrower integer types (`BOOLEAN`, `INTEGER_BYTE`, `INTEGER_SHORT`) are encoded as plain `INTEGER`, and each table's flags (their exact meaning is unknown but must be preserved) are **not** written to the `.sqlite` file — `sqlToCdb` falls back to a static table of flags extracted from official PCM saves (`TABLE_FLAGS_BY_ID`) instead. Pass `{ preciseTypes: true }` (`--precise-types` on the CLI) to encode the exact CDB type and store each table's real flags in the `Flags` column instead of relying on that fallback.
+Column indices and data types are encoded into each column's declared type annotation, so `cdb → sqlite → cdb` preserves every row value even when the SQLite database is saved to disk and reopened in a separate process. How much of the *schema* survives depends on the mode: `preciseTypes: true` round-trips the CDB types and table flags exactly, while the default trades some of that fidelity for interop. By default, CDB's narrower integer types (`BOOLEAN`, `INTEGER_BYTE`, `INTEGER_SHORT`) are encoded as plain `INTEGER`, and each table's flags (their exact meaning is unknown but must be preserved) are **not** written to the `.sqlite` file — `sqlToCdb` falls back to a static table of flags extracted from official PCM saves (`TABLE_FLAGS_BY_ID`) instead. Pass `{ preciseTypes: true }` (`--precise-types` on the CLI) to encode the exact CDB type and store each table's real flags in the `Flags` column instead of relying on that fallback.
 
 This default exists specifically for interop: the official PCM `SQLiteExporter` tool only recognizes `FLOAT`, `STRING` and the two list types in this metadata and has no `Flags` column — a `.sqlite` written with `preciseTypes: true` crashes it on import. Leave `preciseTypes` off if you need the output to be re-importable by that tool; turn it on if `cdb-converter` (via `sqlToCdb`) is the only tool that will ever read the file back and you want the extra fidelity.
 
 ## Compatibility
 
-The CDB parser is **format-driven, not version-specific**, so it is not tied to a single Pro Cycling Manager release. Lossless round-trip conversion (`cdb → sqlite → cdb`) is tested against the official databases of:
+The CDB parser is **format-driven, not version-specific**, so it is not tied to a single Pro Cycling Manager release. Round-trip conversion (`cdb → sqlite → cdb`) is tested against the official databases of — losslessly, including types and flags, with `preciseTypes: true`, and preserving all row data in the default mode:
 
 | Version                  | Status    |
 | ------------------------ | --------- |

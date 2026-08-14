@@ -41,9 +41,9 @@ interface TableSnapshot {
  */
 function snapshot(db: SqlDatabase): TableSnapshot[] {
 	const structureInfo = db.exec(`PRAGMA table_info("DB_STRUCTURE")`);
-	const hasFlagsColumn = structureInfo[0].values.some(
-		(row) => row[1] === "Flags",
-	);
+	const hasFlagsColumn =
+		structureInfo.length > 0 &&
+		structureInfo[0].values.some((row) => row[1] === "Flags");
 
 	const structure = db.exec(
 		hasFlagsColumn
