@@ -266,8 +266,9 @@ function samePath(a: string, b: string): boolean {
 }
 
 /**
- * True when this module is the process entry point, false when it is imported
- * as a library (`import { run } from "cdb-converter"`).
+ * True when this module is the process entry point, false when it is merely
+ * imported (by the test suite, or by anything that loads the file directly),
+ * in which case importing it must not run a conversion.
  *
  * Both sides must be dereferenced: npm installs the bin as a symlink
  * (node_modules/.bin/cdb-converter -> ../cdb-converter/dist/cli.mjs), and Node
