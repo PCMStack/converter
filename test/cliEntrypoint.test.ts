@@ -76,7 +76,7 @@ describe.skipIf(isWindows)("CLI invoked through a symlink", () => {
 
 		// Mirrors what `npm install` creates for the "bin" entry.
 		linkPath = join(workDir, "bin", "cdb-converter");
-		await symlink(cliPath, linkPath);
+		await symlink(cliPath, linkPath, "file");
 	});
 
 	it("converts a real .cdb and writes the output file", () => {
