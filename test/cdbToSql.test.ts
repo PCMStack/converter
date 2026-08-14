@@ -151,4 +151,88 @@ describe("cdb/sql conversion surface", () => {
 
 		mockReadChunk.mockReset();
 	});
+
+	it("collapses BOOLEAN/INTEGER_BYTE/INTEGER_SHORT to plain INTEGER by default", () => {
+		const sql = createMockSqlJs();
+
+		// DataType: INTEGER=0, FLOAT=1, BOOLEAN=3, INTEGER_BYTE=4, INTEGER_SHORT=5
+		const tableColumns = [
+			{ name: "id", columnIndex: 0, type: 0, data: [] },
+			{ name: "flag", columnIndex: 1, type: 3, data: [] },
+			{ name: "small", columnIndex: 2, type: 4, data: [] },
+			{ name: "medium", columnIndex: 3, type: 5, data: [] },
+			{ name: "ratio", columnIndex: 4, type: 1, data: [] },
+		];
+
+		mockReadChunk.mockReturnValueOnce({
+			children: {
+				1: [
+					{
+						name: "Narrow",
+						tableId: 2,
+						tableFlags: 0,
+						rowCount: 0,
+						columns: tableColumns,
+					},
+				],
+			},
+		});
+
+		cdbToSql(new Uint8Array([1, 2, 3]), sql);
+		const [db] = sql.createdDatabases;
+
+		const createStatement = db.sqlOperations.find((op) =>
+			op.sql.startsWith('CREATE TABLE "Narrow"'),
+		);
+
+		// tableId=2 -> base 8192 (2*4096); +columnIndex*16; nibble collapsed to 0
+		// for id/flag/small/medium, kept as 1 (FLOAT) for ratio.
+		expect(createStatement?.sql).toBe(
+			'CREATE TABLE "Narrow" ("id" \'INTEGER 8192\', "flag" \'INTEGER 8208\', ' +
+				"\"small\" 'INTEGER 8224', \"medium\" 'INTEGER 8240', \"ratio\" 'REAL 8257')",
+		);
+
+		mockReadChunk.mockReset();
+	});
+
+	it("preserves the exact CDB type with preciseTypes: true", () => {
+		const sql = createMockSqlJs();
+
+		const tableColumns = [
+			{ name: "id", columnIndex: 0, type: 0, data: [] },
+			{ name: "flag", columnIndex: 1, type: 3, data: [] },
+			{ name: "small", columnIndex: 2, type: 4, data: [] },
+			{ name: "medium", columnIndex: 3, type: 5, data: [] },
+			{ name: "ratio", columnIndex: 4, type: 1, data: [] },
+		];
+
+		mockReadChunk.mockReturnValueOnce({
+			children: {
+				1: [
+					{
+						name: "Narrow",
+						tableId: 2,
+						tableFlags: 0,
+						rowCount: 0,
+						columns: tableColumns,
+					},
+				],
+			},
+		});
+
+		cdbToSql(new Uint8Array([1, 2, 3]), sql, { preciseTypes: true });
+		const [db] = sql.createdDatabases;
+
+		const createStatement = db.sqlOperations.find((op) =>
+			op.sql.startsWith('CREATE TABLE "Narrow"'),
+		);
+
+		// Same base offsets, but the true nibble (3/4/5) is kept instead of 0.
+		expect(createStatement?.sql).toBe(
+			'CREATE TABLE "Narrow" ("id" \'INTEGER 8192\', "flag" \'NUMERIC 8211\', ' +
+				"\"small\" 'INTEGER 8228', \"medium\" 'INTEGER 8245', \"ratio\" 'REAL 8257')",
+		);
+
+		mockReadChunk.mockReset();
+	});
 });

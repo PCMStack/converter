@@ -87,6 +87,7 @@ npx cdb-converter --version
 | ------------------- | -------------------------------------------------------------------------------------------------- |
 | `-n`, `--normalize` | (CDB → SQLite only) reconstruct PK/FK constraints from PCM naming conventions. See [Normalized schema](#normalized-schema). |
 | `--index-fk`        | Implies `--normalize`; also indexes every FK column for faster JOINs (roughly doubles output size). |
+| `--precise-types`   | (CDB → SQLite only) preserve the exact CDB type (BOOLEAN, INTEGER_BYTE, INTEGER_SHORT) instead of collapsing it to plain INTEGER. See [Compatibility](#compatibility). |
 
 ## Library usage
 
@@ -203,6 +204,7 @@ Convert CDB binary data into a SQLite database instance.
 - **`SQL`** — `SqlJsStatic`, the module returned by `initSqlJs()`.
 - **`options.normalize`** — `boolean` (default `false`). Reconstruct PK/FK constraints from PCM naming conventions. See [Normalized schema](#normalized-schema).
 - **`options.indexForeignKeys`** — `boolean` (default `false`). When normalizing, also index every FK column for faster JOINs (roughly doubles the output size).
+- **`options.preciseTypes`** — `boolean` (default `false`). Preserve the exact CDB type (BOOLEAN, INTEGER_BYTE, INTEGER_SHORT) and each table's flags in the `.sqlite` file instead of the official-tool-compatible defaults. See [How metadata is preserved](#how-metadata-is-preserved).
 - **returns** — a `sql.js` `Database` with the CDB tables loaded.
 
 ### `sqlToCdb(db): ArrayBuffer`
@@ -242,14 +244,16 @@ Every CDB data type is preserved during conversion:
 The library uses a special `DB_STRUCTURE` table to round-trip CDB metadata that has no native SQLite equivalent:
 
 ```sql
-CREATE TABLE DB_STRUCTURE (
-  TableName TEXT '274',
-  ID INTEGER,
-  Flags INTEGER
-)
+-- default (compatible with the official PCM SQLiteExporter tool)
+CREATE TABLE DB_STRUCTURE (TableName '274', ID '0')
+
+-- with { preciseTypes: true }
+CREATE TABLE DB_STRUCTURE (TableName TEXT '274', ID INTEGER, Flags INTEGER)
 ```
 
-Each table's flags (their exact meaning is unknown but must be preserved) are stored in the `Flags` column, so they are written into the `.sqlite` file itself and survive an `export()`/reopen cycle. Column indices and data types are encoded into each column's declared type annotation. Together this makes `cdb → sqlite → cdb` lossless even when the SQLite database is saved to disk and reopened in a separate process.
+Column indices and data types are encoded into each column's declared type annotation, which makes `cdb → sqlite → cdb` lossless even when the SQLite database is saved to disk and reopened in a separate process. By default, CDB's narrower integer types (`BOOLEAN`, `INTEGER_BYTE`, `INTEGER_SHORT`) are encoded as plain `INTEGER`, and each table's flags (their exact meaning is unknown but must be preserved) are **not** written to the `.sqlite` file — `sqlToCdb` falls back to a static table of flags extracted from official PCM saves (`TABLE_FLAGS_BY_ID`) instead. Pass `{ preciseTypes: true }` (`--precise-types` on the CLI) to encode the exact CDB type and store each table's real flags in the `Flags` column instead of relying on that fallback.
+
+This default exists specifically for interop: the official PCM `SQLiteExporter` tool only recognizes `FLOAT`, `STRING` and the two list types in this metadata and has no `Flags` column — a `.sqlite` written with `preciseTypes: true` crashes it on import. Leave `preciseTypes` off if you need the output to be re-importable by that tool; turn it on if `cdb-converter` (via `sqlToCdb`) is the only tool that will ever read the file back and you want the extra fidelity.
 
 ## Compatibility
 
@@ -262,6 +266,8 @@ The CDB parser is **format-driven, not version-specific**, so it is not tied to 
 | Pro Cycling Manager 2019 | ✅ tested |
 | Pro Cycling Manager 2021 | ✅ tested |
 | Pro Cycling Manager 2025 | ✅ tested |
+
+The default (non-`preciseTypes`) `.sqlite` output is also verified importable by the official PCM `SQLiteExporter` tool (`-import`) on Pro Cycling Manager 2025 saves, round-tripping back through `cdb-converter` with identical data. `SQLiteExporter` itself cannot export the 2014 fixture (it crashes on that file directly, independent of anything produced by this library), so that combination isn't claimed.
 
 ## Performance & size
 

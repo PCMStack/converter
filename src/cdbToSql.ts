@@ -132,10 +132,18 @@ export function cdbToSql(
 	// DB_STRUCTURE mirrors the PCM convention used by sqlToCdb: TableName keeps the
 	// literal type annotation '274' so the schema matches the metadata table shape
 	// expected by round-trip consumers, while only the table rows are read back.
-	// Flags persists each table's TABLE_FLAGS into the SQLite file so it survives an
-	// export()/reopen round-trip (its meaning is unknown but must be preserved).
+	//
+	// The official SQLiteExporter tool declares this table with no SQL type
+	// keyword at all (`TableName '274',ID '0'`) and no Flags column; matching that
+	// exactly by default keeps our output importable there (a mismatch here isn't
+	// just cosmetic — SQLiteExporter crashes on the extra/typed columns). Flags
+	// persists each table's TABLE_FLAGS so it survives an export()/reopen
+	// round-trip; it's only added under preciseTypes since sqlToCdb already falls
+	// back to TABLE_FLAGS_BY_ID when the column is absent.
 	db.run(
-		`CREATE TABLE DB_STRUCTURE (TableName TEXT '274', ID INTEGER, Flags INTEGER)`,
+		options?.preciseTypes
+			? `CREATE TABLE DB_STRUCTURE (TableName TEXT '274', ID INTEGER, Flags INTEGER)`
+			: `CREATE TABLE DB_STRUCTURE (TableName '274',ID '0')`,
 	);
 
 	const keyMap = options?.normalize ? inferKeys(tables) : null;
@@ -159,11 +167,18 @@ export function cdbToSql(
 	db.run("BEGIN TRANSACTION");
 
 	tables.forEach((table) => {
-		db.run(`INSERT INTO DB_STRUCTURE VALUES (?, ?, ?)`, [
-			table.name,
-			table.tableId,
-			table.tableFlags,
-		]);
+		if (options?.preciseTypes) {
+			db.run(`INSERT INTO DB_STRUCTURE VALUES (?, ?, ?)`, [
+				table.name,
+				table.tableId,
+				table.tableFlags,
+			]);
+		} else {
+			db.run(`INSERT INTO DB_STRUCTURE VALUES (?, ?)`, [
+				table.name,
+				table.tableId,
+			]);
+		}
 		const escapedTableName = escapeSqlIdentifier(table.name);
 
 		// Keep columns in original file order (do NOT sort)
@@ -171,25 +186,40 @@ export function cdbToSql(
 			.map((col) => {
 				const escapedColumnName = escapeSqlIdentifier(col.name);
 				let baseType: string;
+				let encodedType: number;
 				switch (col.type) {
 					case DATA_TYPE.FLOAT:
 						baseType = "REAL";
+						encodedType = col.type;
 						break;
 					case DATA_TYPE.STRING:
 					case DATA_TYPE.INTEGER_LIST:
 					case DATA_TYPE.FLOAT_LIST:
 						baseType = "TEXT";
+						encodedType = col.type;
 						break;
 					case DATA_TYPE.BOOLEAN:
-						baseType = "NUMERIC";
+						// `SQLiteExporter` (the official PCM tool) has no case for BOOLEAN,
+						// INTEGER_BYTE or INTEGER_SHORT: they all fall into its default
+						// branch and get encoded as plain INTEGER. Match that by default so
+						// our output stays importable there; preciseTypes opts back into
+						// preserving the exact CDB type for our own round-trip.
+						baseType = options?.preciseTypes ? "NUMERIC" : "INTEGER";
+						encodedType = options?.preciseTypes ? col.type : DATA_TYPE.INTEGER;
+						break;
+					case DATA_TYPE.INTEGER_BYTE:
+					case DATA_TYPE.INTEGER_SHORT:
+						baseType = "INTEGER";
+						encodedType = options?.preciseTypes ? col.type : DATA_TYPE.INTEGER;
 						break;
 					default:
 						baseType = "INTEGER";
+						encodedType = DATA_TYPE.INTEGER;
 						break;
 				}
 
 				const encodedValue =
-					(table.tableId * 256 + col.columnIndex) * 16 + (col.type & 0xf);
+					(table.tableId * 256 + col.columnIndex) * 16 + (encodedType & 0xf);
 				return `"${escapedColumnName}" '${baseType} ${encodedValue}'`;
 			})
 			.join(", ");
