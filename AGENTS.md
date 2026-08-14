@@ -13,23 +13,27 @@ This package converts Pro Cycling Manager CDB binary database files to and from 
 
 ### Terminology
 
-Three words, deliberately not interchangeable:
+Two words, deliberately not interchangeable (same meanings as in `pcm-mcp`):
 
-- **CDB** — Cyanide's binary database format, the `.cdb` file. This is what the
-  library reads and writes, and it is always handled as a *buffer*, never a path:
-  the public API takes `cdbBuffer` / returns `Uint8Array`, and only the CLI in
-  [src/cli.ts](src/cli.ts) ever touches the filesystem. The format internals live
-  in [src/reader.ts](src/reader.ts), [src/writer.ts](src/writer.ts),
-  [src/compression.ts](src/compression.ts) and [src/tableMetadata.ts](src/tableMetadata.ts).
-- **database** — on its own, always the *SQLite* side: a `sql.js` `Database`
-  instance (aliased `SqlDatabase`) or the `.sqlite` file it exports to. Never use
-  it bare for a `.cdb`; say "CDB" or "CDB database" when that is what you mean.
+- **database** — a `.cdb` file. Cyanide's binary database format, and what this
+  library exists to read and write. It may be a player save, an official release
+  or a community update; nothing in the conversion path cares which. Here it is
+  always handled as a *buffer*, never a path: the public API takes `cdbBuffer` /
+  returns `Uint8Array`, and only the CLI in [src/cli.ts](src/cli.ts) touches the
+  filesystem. The format internals live in [src/reader.ts](src/reader.ts),
+  [src/writer.ts](src/writer.ts), [src/compression.ts](src/compression.ts) and
+  [src/tableMetadata.ts](src/tableMetadata.ts).
 - **save** — a `.cdb` the *game itself wrote* as the player played, as opposed to
-  an official release or a community update. Nothing in the conversion path cares
-  about the difference, so this word belongs only where the provenance is the
-  actual point: the reverse-engineering notes in
-  [src/keyInference.ts](src/keyInference.ts) and [src/tableMetadata.ts](src/tableMetadata.ts)
-  ("observed in real saves"). Do not use it as a generic name for the input file.
+  an official release or a community update. This repository has no notion of
+  save discovery, so the word belongs only where provenance is the actual point:
+  the reverse-engineering notes in [src/keyInference.ts](src/keyInference.ts) and
+  [src/tableMetadata.ts](src/tableMetadata.ts) ("observed in real saves"). Never
+  use it as a generic name for the input file.
+
+Because this repository is the one place both formats are live at once, the
+SQLite side is *always* qualified: "SQLite database", the `.sqlite` file, or the
+`sql.js` `Database` instance (aliased `SqlDatabase`). Bare "database" in prose
+means the `.cdb`.
 
 ## Commands
 
