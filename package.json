@@ -50,7 +50,7 @@
 		"test:watch": "vitest",
 		"coverage": "vitest run --coverage",
 		"bench": "vitest bench --run",
-		"prepare": "husky install"
+		"prepare": "husky"
 	},
 	"dependencies": {
 		"@types/sql.js": "^1.4.11",
