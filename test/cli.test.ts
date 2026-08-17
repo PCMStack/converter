@@ -23,6 +23,7 @@ describe("parseArgs", () => {
 			output: undefined,
 			normalize: false,
 			indexForeignKeys: false,
+			preciseTypes: false,
 		});
 		expect(parseArgs(["save.cdb", "out.sqlite"])).toEqual({
 			command: "convert",
@@ -30,6 +31,7 @@ describe("parseArgs", () => {
 			output: "out.sqlite",
 			normalize: false,
 			indexForeignKeys: false,
+			preciseTypes: false,
 		});
 	});
 
@@ -40,6 +42,7 @@ describe("parseArgs", () => {
 			output: "out.sqlite",
 			normalize: true,
 			indexForeignKeys: false,
+			preciseTypes: false,
 		});
 		expect(parseArgs(["-n", "save.cdb"])).toEqual({
 			command: "convert",
@@ -47,6 +50,7 @@ describe("parseArgs", () => {
 			output: undefined,
 			normalize: true,
 			indexForeignKeys: false,
+			preciseTypes: false,
 		});
 	});
 
@@ -57,6 +61,18 @@ describe("parseArgs", () => {
 			output: "out.sqlite",
 			normalize: true,
 			indexForeignKeys: true,
+			preciseTypes: false,
+		});
+	});
+
+	it("parses the --precise-types flag", () => {
+		expect(parseArgs(["save.cdb", "out.sqlite", "--precise-types"])).toEqual({
+			command: "convert",
+			input: "save.cdb",
+			output: "out.sqlite",
+			normalize: false,
+			indexForeignKeys: false,
+			preciseTypes: true,
 		});
 	});
 
@@ -67,6 +83,7 @@ describe("parseArgs", () => {
 			output: undefined,
 			normalize: false,
 			indexForeignKeys: false,
+			preciseTypes: false,
 		});
 	});
 
@@ -84,6 +101,7 @@ describe("parseArgs", () => {
 			output: undefined,
 			normalize: false,
 			indexForeignKeys: false,
+			preciseTypes: false,
 		});
 		expect(parseArgs(["--", "--data.cdb", "-out.sqlite"])).toEqual({
 			command: "convert",
@@ -91,6 +109,7 @@ describe("parseArgs", () => {
 			output: "-out.sqlite",
 			normalize: false,
 			indexForeignKeys: false,
+			preciseTypes: false,
 		});
 		expect(
 			parseArgs(["save.cdb", "out.sqlite", "--normalize", "--", "-x"]),
@@ -100,6 +119,7 @@ describe("parseArgs", () => {
 			output: "out.sqlite",
 			normalize: true,
 			indexForeignKeys: false,
+			preciseTypes: false,
 		});
 	});
 });

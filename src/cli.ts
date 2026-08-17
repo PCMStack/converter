@@ -21,6 +21,7 @@ export interface ParsedArgs {
 	output?: string;
 	normalize?: boolean;
 	indexForeignKeys?: boolean;
+	preciseTypes?: boolean;
 }
 
 const HELP_TEXT = `cdb-converter — convert Pro Cycling Manager CDB files to/from SQLite
@@ -46,12 +47,19 @@ Options:
                      schema. Ignored when converting sqlite -> cdb.
       --index-fk     (implies --normalize) also index every foreign-key column
                      for faster JOINs. Roughly doubles the output size.
+      --precise-types
+                     (cdb -> sqlite only) preserve the exact CDB type (BOOLEAN,
+                     INTEGER_BYTE, INTEGER_SHORT) in the SQLite schema instead
+                     of collapsing them to plain INTEGER. Off by default so the
+                     output stays importable by the official PCM SQLiteExporter
+                     tool, which does not recognize those types.
 
 Examples:
   cdb-converter save.cdb
   cdb-converter save.cdb save.sqlite
   cdb-converter save.cdb save.sqlite --normalize
   cdb-converter save.cdb save.sqlite --normalize --index-fk
+  cdb-converter save.cdb save.sqlite --precise-types
   cdb-converter -- --data.cdb  (use -- to treat a leading-dash path as a positional argument)
   cdb-converter save.sqlite save.cdb`;
 
@@ -59,6 +67,7 @@ export function parseArgs(argv: string[]): ParsedArgs {
 	const positionals: string[] = [];
 	let normalize = false;
 	let indexForeignKeys = false;
+	let preciseTypes = false;
 
 	let optionsEnded = false;
 
@@ -87,6 +96,10 @@ export function parseArgs(argv: string[]): ParsedArgs {
 			indexForeignKeys = true;
 			continue;
 		}
+		if (arg === "--precise-types") {
+			preciseTypes = true;
+			continue;
+		}
 		if (arg.startsWith("-") && arg !== "-") {
 			throw new Error(
 				`Unknown option "${arg}". Run "cdb-converter --help" for usage.`,
@@ -101,6 +114,7 @@ export function parseArgs(argv: string[]): ParsedArgs {
 		output: positionals[1],
 		normalize,
 		indexForeignKeys,
+		preciseTypes,
 	};
 }
 
@@ -148,6 +162,7 @@ async function convert(
 	output: string | undefined,
 	normalize: boolean,
 	indexForeignKeys: boolean,
+	preciseTypes: boolean,
 ): Promise<void> {
 	const direction = detectDirection(input);
 	const inputPath = resolve(process.cwd(), input);
@@ -163,7 +178,11 @@ async function convert(
 	let summary: string[] = [];
 
 	if (direction === "cdb-to-sql") {
-		const db = cdbToSql(inputBytes, SQL, { normalize, indexForeignKeys });
+		const db = cdbToSql(inputBytes, SQL, {
+			normalize,
+			indexForeignKeys,
+			preciseTypes,
+		});
 
 		try {
 			const tables = db.exec(
@@ -176,6 +195,9 @@ async function convert(
 			];
 			if (normalize && indexForeignKeys) {
 				summary.push("FK indexes : yes");
+			}
+			if (preciseTypes) {
+				summary.push("Precise types : yes");
 			}
 
 			outputBytes = db.export();
@@ -235,6 +257,7 @@ export async function run(argv: string[]): Promise<void> {
 			parsed.output,
 			parsed.normalize ?? false,
 			parsed.indexForeignKeys ?? false,
+			parsed.preciseTypes ?? false,
 		);
 	} catch (error) {
 		console.error(`Error: ${error instanceof Error ? error.message : error}`);

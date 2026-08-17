@@ -96,4 +96,19 @@ export interface CdbToSqlOptions {
 	 * intend to run frequent filtered JOINs on the output.
 	 */
 	indexForeignKeys?: boolean;
+
+	/**
+	 * Encode each column's exact CDB data type (BOOLEAN, INTEGER_BYTE,
+	 * INTEGER_SHORT) into the SQLite schema instead of collapsing them to plain
+	 * INTEGER. Off by default.
+	 *
+	 * The official PCM `SQLiteExporter` tool only recognizes FLOAT, STRING and
+	 * the two list types in this metadata; anything else (including BOOLEAN,
+	 * INTEGER_BYTE and INTEGER_SHORT) is written as plain INTEGER. A `.sqlite`
+	 * produced with `preciseTypes: true` preserves the exact CDB type through
+	 * `sqlToCdb` round-trips, but its schema is not understood by that
+	 * third-party tool and re-importing it there will crash. Leave this off if
+	 * you need the output to be interchangeable with `SQLiteExporter`.
+	 */
+	preciseTypes?: boolean;
 }
