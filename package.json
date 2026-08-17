@@ -1,6 +1,6 @@
 {
 	"name": "cdb-converter",
-	"version": "0.3.0",
+	"version": "0.4.0",
 	"description": "Convert Pro Cycling Manager CDB files to/from SQLite and other formats. TypeScript library with zero configuration.",
 	"license": "MIT",
 	"author": "PCMStack",
@@ -25,7 +25,7 @@
 	"module": "./dist/index.mjs",
 	"types": "./dist/index.d.ts",
 	"bin": {
-		"cdb-converter": "./dist/cli.mjs"
+		"cdb-converter": "dist/cli.mjs"
 	},
 	"exports": {
 		".": {
