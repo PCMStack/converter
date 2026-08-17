@@ -8,7 +8,7 @@ import { inferKeys } from "./keyInference";
 import type { TableKeys } from "./keyInference";
 import { CDBReader } from "./reader";
 import { escapeSqlIdentifier } from "./sqlUtils";
-import { CHUNK_TYPE, DATA_TYPE } from "./tableMetadata";
+import { ChunkType, DataType } from "./types";
 import type {
 	CdbToSqlOptions,
 	SqlDatabase,
@@ -126,7 +126,7 @@ export function cdbToSql(
 	}
 
 	const tables =
-		(wrapperChildren[CHUNK_TYPE.DATABASE_TABLES] as TableInfo[] | undefined) ??
+		(wrapperChildren[ChunkType.DATABASE_TABLES] as TableInfo[] | undefined) ??
 		[];
 
 	// DB_STRUCTURE mirrors the PCM convention used by sqlToCdb: TableName keeps the
@@ -188,33 +188,33 @@ export function cdbToSql(
 				let baseType: string;
 				let encodedType: number;
 				switch (col.type) {
-					case DATA_TYPE.FLOAT:
+					case DataType.FLOAT:
 						baseType = "REAL";
 						encodedType = col.type;
 						break;
-					case DATA_TYPE.STRING:
-					case DATA_TYPE.INTEGER_LIST:
-					case DATA_TYPE.FLOAT_LIST:
+					case DataType.STRING:
+					case DataType.INTEGER_LIST:
+					case DataType.FLOAT_LIST:
 						baseType = "TEXT";
 						encodedType = col.type;
 						break;
-					case DATA_TYPE.BOOLEAN:
+					case DataType.BOOLEAN:
 						// `SQLiteExporter` (the official PCM tool) has no case for BOOLEAN,
 						// INTEGER_BYTE or INTEGER_SHORT: they all fall into its default
 						// branch and get encoded as plain INTEGER. Match that by default so
 						// our output stays importable there; preciseTypes opts back into
 						// preserving the exact CDB type for our own round-trip.
 						baseType = options?.preciseTypes ? "NUMERIC" : "INTEGER";
-						encodedType = options?.preciseTypes ? col.type : DATA_TYPE.INTEGER;
+						encodedType = options?.preciseTypes ? col.type : DataType.INTEGER;
 						break;
-					case DATA_TYPE.INTEGER_BYTE:
-					case DATA_TYPE.INTEGER_SHORT:
+					case DataType.INTEGER_BYTE:
+					case DataType.INTEGER_SHORT:
 						baseType = "INTEGER";
-						encodedType = options?.preciseTypes ? col.type : DATA_TYPE.INTEGER;
+						encodedType = options?.preciseTypes ? col.type : DataType.INTEGER;
 						break;
 					default:
 						baseType = "INTEGER";
-						encodedType = DATA_TYPE.INTEGER;
+						encodedType = DataType.INTEGER;
 						break;
 				}
 

@@ -5,24 +5,20 @@
 import { compressCdb } from "./compression";
 import { escapeSqlIdentifier } from "./sqlUtils";
 import { CDBWriter } from "./writer";
-import {
-	CHUNK_TYPE,
-	DATA_TYPE,
-	MAGIC,
-	TABLE_FLAGS_BY_ID,
-} from "./tableMetadata";
-import type { ColumnMetadata, DataType, SqlDatabase } from "./types";
+import { TABLE_FLAGS_BY_ID } from "./tableMetadata";
+import { ChunkType, DataType, Magic } from "./types";
+import type { ColumnMetadata, SqlDatabase } from "./types";
 
 function toDataType(value: number): DataType {
 	switch (value) {
-		case DATA_TYPE.INTEGER:
-		case DATA_TYPE.FLOAT:
-		case DATA_TYPE.STRING:
-		case DATA_TYPE.BOOLEAN:
-		case DATA_TYPE.INTEGER_BYTE:
-		case DATA_TYPE.INTEGER_SHORT:
-		case DATA_TYPE.FLOAT_LIST:
-		case DATA_TYPE.INTEGER_LIST:
+		case DataType.INTEGER:
+		case DataType.FLOAT:
+		case DataType.STRING:
+		case DataType.BOOLEAN:
+		case DataType.INTEGER_BYTE:
+		case DataType.INTEGER_SHORT:
+		case DataType.FLOAT_LIST:
+		case DataType.INTEGER_LIST:
 			return value;
 		default:
 			throw new Error(`Unsupported CDB data type: ${value}`);
@@ -86,13 +82,13 @@ export function sqlToCdb(db: SqlDatabase): ArrayBuffer {
 			? new CDBWriter(estimatedSize)
 			: new CDBWriter();
 
-	writer.writeChunkOpen(CHUNK_TYPE.WRAPPER, "cyanide database");
-	writer.writeChunkOpen(CHUNK_TYPE.DATABASE_FLAGS);
+	writer.writeChunkOpen(ChunkType.WRAPPER, "cyanide database");
+	writer.writeChunkOpen(ChunkType.DATABASE_FLAGS);
 	writer.write32(274);
 	writer.writeChunkClose();
 
-	writer.writeChunkOpen(CHUNK_TYPE.DATABASE_TABLES);
-	writer.write32(MAGIC.ARRAY_BEGIN);
+	writer.writeChunkOpen(ChunkType.DATABASE_TABLES);
+	writer.write32(Magic.ARRAY_BEGIN);
 	writer.write32(tables.length);
 
 	tables.forEach((tableInfo) => {
@@ -116,23 +112,23 @@ export function sqlToCdb(db: SqlDatabase): ArrayBuffer {
 		const dataResult = db.exec(`SELECT * FROM "${escapedTableName}"`);
 		const rows = dataResult.length > 0 ? dataResult[0].values : [];
 
-		writer.writeChunkOpen(CHUNK_TYPE.TABLE, tableInfo.name);
+		writer.writeChunkOpen(ChunkType.TABLE, tableInfo.name);
 
-		writer.writeChunkOpen(CHUNK_TYPE.TABLE_ID);
+		writer.writeChunkOpen(ChunkType.TABLE_ID);
 		writer.write32(tableInfo.id);
 		writer.writeChunkClose();
 
-		writer.writeChunkOpen(CHUNK_TYPE.ROW_COUNT);
+		writer.writeChunkOpen(ChunkType.ROW_COUNT);
 		writer.write32(rows.length);
 		writer.writeChunkClose();
 
-		writer.writeChunkOpen(CHUNK_TYPE.TABLE_FLAGS);
+		writer.writeChunkOpen(ChunkType.TABLE_FLAGS);
 		const tableFlags = tableInfo.flags ?? TABLE_FLAGS_BY_ID[tableInfo.id] ?? 0;
 		writer.write32(tableFlags);
 		writer.writeChunkClose();
 
-		writer.writeChunkOpen(CHUNK_TYPE.COLUMN_DEFINITIONS);
-		writer.write32(MAGIC.ARRAY_BEGIN);
+		writer.writeChunkOpen(ChunkType.COLUMN_DEFINITIONS);
+		writer.write32(Magic.ARRAY_BEGIN);
 		writer.write32(Object.keys(columnInfo).length);
 
 		// Transpose row data to column data in single pass
@@ -145,15 +141,15 @@ export function sqlToCdb(db: SqlDatabase): ArrayBuffer {
 		});
 
 		columnNames.forEach((columnName, colIdx) => {
-			writer.writeChunkOpen(CHUNK_TYPE.COLUMN, columnName);
+			writer.writeChunkOpen(ChunkType.COLUMN, columnName);
 
 			const info = columnInfo[columnName];
 
-			writer.writeChunkOpen(CHUNK_TYPE.COLUMN_INDEX);
+			writer.writeChunkOpen(ChunkType.COLUMN_INDEX);
 			writer.write32(info.cdbColumnIndex);
 			writer.writeChunkClose();
 
-			writer.writeChunkOpen(CHUNK_TYPE.COLUMN_DATA_TYPE, columnName);
+			writer.writeChunkOpen(ChunkType.COLUMN_DATA_TYPE, columnName);
 			writer.write32(info.cdbDataType);
 			writer.writeChunkClose();
 
@@ -178,13 +174,13 @@ export function sqlToCdb(db: SqlDatabase): ArrayBuffer {
 			writer.writeChunkClose();
 		});
 
-		writer.write32(MAGIC.ARRAY_END);
+		writer.write32(Magic.ARRAY_END);
 		writer.writeChunkClose();
 
 		writer.writeChunkClose();
 	});
 
-	writer.write32(MAGIC.ARRAY_END);
+	writer.write32(Magic.ARRAY_END);
 	writer.writeChunkClose();
 	writer.writeChunkClose();
 

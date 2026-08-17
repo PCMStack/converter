@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { CDBReader } from "../src/reader";
-import { CHUNK_TYPE, DATA_TYPE, MAGIC } from "../src/tableMetadata";
+import { ChunkType, DataType, Magic } from "../src/types";
 import { CDBWriter } from "../src/writer";
 
 function createChunkBuffer(overrides?: {
@@ -10,13 +10,13 @@ function createChunkBuffer(overrides?: {
 	const buffer = new ArrayBuffer(28);
 	const view = new DataView(buffer);
 
-	view.setUint32(0, overrides?.chunkBegin ?? MAGIC.CHUNK_BEGIN, true);
+	view.setUint32(0, overrides?.chunkBegin ?? Magic.CHUNK_BEGIN, true);
 	view.setUint32(4, 28, true);
-	view.setUint32(8, CHUNK_TYPE.WRAPPER, true);
+	view.setUint32(8, ChunkType.WRAPPER, true);
 	view.setUint32(12, 0, true);
 	view.setUint32(16, 0, true);
-	view.setUint32(20, overrides?.chunkSeparator ?? MAGIC.CHUNK_SEPARATOR, true);
-	view.setUint32(24, MAGIC.CHUNK_END, true);
+	view.setUint32(20, overrides?.chunkSeparator ?? Magic.CHUNK_SEPARATOR, true);
+	view.setUint32(24, Magic.CHUNK_END, true);
 
 	return new Uint8Array(buffer);
 }
@@ -24,35 +24,35 @@ function createChunkBuffer(overrides?: {
 function createWrapperWithMissingColumnDescription(): Uint8Array {
 	const writer = new CDBWriter();
 
-	writer.writeChunkOpen(CHUNK_TYPE.WRAPPER);
-	writer.writeChunkOpen(CHUNK_TYPE.DATABASE_TABLES);
-	writer.write32(MAGIC.ARRAY_BEGIN);
+	writer.writeChunkOpen(ChunkType.WRAPPER);
+	writer.writeChunkOpen(ChunkType.DATABASE_TABLES);
+	writer.write32(Magic.ARRAY_BEGIN);
 	writer.write32(1);
-	writer.writeChunkOpen(CHUNK_TYPE.TABLE, "TestTable");
-	writer.writeChunkOpen(CHUNK_TYPE.ROW_COUNT);
+	writer.writeChunkOpen(ChunkType.TABLE, "TestTable");
+	writer.writeChunkOpen(ChunkType.ROW_COUNT);
 	writer.write32(0);
 	writer.writeChunkClose();
-	writer.writeChunkOpen(CHUNK_TYPE.TABLE_ID);
+	writer.writeChunkOpen(ChunkType.TABLE_ID);
 	writer.write32(1);
 	writer.writeChunkClose();
-	writer.writeChunkOpen(CHUNK_TYPE.TABLE_FLAGS);
+	writer.writeChunkOpen(ChunkType.TABLE_FLAGS);
 	writer.write32(0);
 	writer.writeChunkClose();
-	writer.writeChunkOpen(CHUNK_TYPE.COLUMN_DEFINITIONS);
-	writer.write32(MAGIC.ARRAY_BEGIN);
+	writer.writeChunkOpen(ChunkType.COLUMN_DEFINITIONS);
+	writer.write32(Magic.ARRAY_BEGIN);
 	writer.write32(1);
-	writer.writeChunkOpen(CHUNK_TYPE.COLUMN);
-	writer.writeChunkOpen(CHUNK_TYPE.COLUMN_DATA_TYPE);
-	writer.write32(DATA_TYPE.INTEGER);
+	writer.writeChunkOpen(ChunkType.COLUMN);
+	writer.writeChunkOpen(ChunkType.COLUMN_DATA_TYPE);
+	writer.write32(DataType.INTEGER);
 	writer.writeChunkClose();
-	writer.writeChunkOpen(CHUNK_TYPE.COLUMN_INDEX);
+	writer.writeChunkOpen(ChunkType.COLUMN_INDEX);
 	writer.write32(0);
 	writer.writeChunkClose();
 	writer.writeChunkClose();
-	writer.write32(MAGIC.ARRAY_END);
+	writer.write32(Magic.ARRAY_END);
 	writer.writeChunkClose();
 	writer.writeChunkClose();
-	writer.write32(MAGIC.ARRAY_END);
+	writer.write32(Magic.ARRAY_END);
 	writer.writeChunkClose();
 	writer.writeChunkClose();
 
@@ -64,13 +64,13 @@ function createUnknownChunkBuffer(payloadLength: number): Uint8Array {
 	const buffer = new ArrayBuffer(chunkSize);
 	const view = new DataView(buffer);
 
-	view.setUint32(0, MAGIC.CHUNK_BEGIN, true);
+	view.setUint32(0, Magic.CHUNK_BEGIN, true);
 	view.setUint32(4, chunkSize, true);
 	view.setUint32(8, 0x99, true); // unknown chunk type
 	view.setUint32(12, 0, true);
 	view.setUint32(16, 0, true);
-	view.setUint32(20, MAGIC.CHUNK_SEPARATOR, true);
-	view.setUint32(24 + payloadLength, MAGIC.CHUNK_END, true);
+	view.setUint32(20, Magic.CHUNK_SEPARATOR, true);
+	view.setUint32(24 + payloadLength, Magic.CHUNK_END, true);
 
 	return new Uint8Array(buffer);
 }
@@ -78,36 +78,36 @@ function createUnknownChunkBuffer(payloadLength: number): Uint8Array {
 function createFloatListTable(rows: string[]): Uint8Array {
 	const writer = new CDBWriter();
 
-	writer.writeChunkOpen(CHUNK_TYPE.WRAPPER);
-	writer.writeChunkOpen(CHUNK_TYPE.DATABASE_TABLES);
-	writer.write32(MAGIC.ARRAY_BEGIN);
+	writer.writeChunkOpen(ChunkType.WRAPPER);
+	writer.writeChunkOpen(ChunkType.DATABASE_TABLES);
+	writer.write32(Magic.ARRAY_BEGIN);
 	writer.write32(1);
-	writer.writeChunkOpen(CHUNK_TYPE.TABLE, "TestTable");
-	writer.writeChunkOpen(CHUNK_TYPE.ROW_COUNT);
+	writer.writeChunkOpen(ChunkType.TABLE, "TestTable");
+	writer.writeChunkOpen(ChunkType.ROW_COUNT);
 	writer.write32(rows.length);
 	writer.writeChunkClose();
-	writer.writeChunkOpen(CHUNK_TYPE.TABLE_ID);
+	writer.writeChunkOpen(ChunkType.TABLE_ID);
 	writer.write32(1);
 	writer.writeChunkClose();
-	writer.writeChunkOpen(CHUNK_TYPE.TABLE_FLAGS);
+	writer.writeChunkOpen(ChunkType.TABLE_FLAGS);
 	writer.write32(0);
 	writer.writeChunkClose();
-	writer.writeChunkOpen(CHUNK_TYPE.COLUMN_DEFINITIONS);
-	writer.write32(MAGIC.ARRAY_BEGIN);
+	writer.writeChunkOpen(ChunkType.COLUMN_DEFINITIONS);
+	writer.write32(Magic.ARRAY_BEGIN);
 	writer.write32(1);
-	writer.writeChunkOpen(CHUNK_TYPE.COLUMN, "values");
-	writer.writeChunkOpen(CHUNK_TYPE.COLUMN_DATA_TYPE);
-	writer.write32(DATA_TYPE.FLOAT_LIST);
+	writer.writeChunkOpen(ChunkType.COLUMN, "values");
+	writer.writeChunkOpen(ChunkType.COLUMN_DATA_TYPE);
+	writer.write32(DataType.FLOAT_LIST);
 	writer.writeChunkClose();
-	writer.writeChunkOpen(CHUNK_TYPE.COLUMN_INDEX);
+	writer.writeChunkOpen(ChunkType.COLUMN_INDEX);
 	writer.write32(0);
 	writer.writeChunkClose();
-	writer.writeColumnData(DATA_TYPE.FLOAT_LIST, rows);
+	writer.writeColumnData(DataType.FLOAT_LIST, rows);
 	writer.writeChunkClose();
-	writer.write32(MAGIC.ARRAY_END);
+	writer.write32(Magic.ARRAY_END);
 	writer.writeChunkClose();
 	writer.writeChunkClose();
-	writer.write32(MAGIC.ARRAY_END);
+	writer.write32(Magic.ARRAY_END);
 	writer.writeChunkClose();
 	writer.writeChunkClose();
 
@@ -119,7 +119,7 @@ function readFloatListColumn(rows: string[]): unknown[] {
 	const chunk = reader.readChunk();
 	const tables = (
 		chunk.children as Record<number, { columns: { data: unknown[] }[] }[]>
-	)[CHUNK_TYPE.DATABASE_TABLES];
+	)[ChunkType.DATABASE_TABLES];
 	return tables[0].columns[0].data;
 }
 

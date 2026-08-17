@@ -2,12 +2,6 @@
  * CDB table metadata and constants
  */
 
-import { ChunkType, DataType, Magic } from "./types";
-
-export const CHUNK_TYPE = ChunkType;
-export const DATA_TYPE = DataType;
-export const MAGIC = Magic;
-
 /**
  * TABLE_FLAGS values by table ID (extracted from PCM save files)
  * Meaning is unknown but must be preserved for round-trip conversion

@@ -3,14 +3,8 @@
  * Handles parsing of chunk hierarchy, data types, and value unpacking
  */
 
-import type {
-	ChunkHeader,
-	CDBChunk,
-	ColumnData,
-	DataType,
-	ColumnInfo,
-} from "./types";
-import { CHUNK_TYPE, DATA_TYPE, MAGIC } from "./tableMetadata";
+import type { ChunkHeader, CDBChunk, ColumnData, ColumnInfo } from "./types";
+import { ChunkType, DataType, Magic } from "./types";
 
 type ColumnDefinition = Omit<ColumnInfo, "data"> & {
 	data?: ColumnData;
@@ -106,7 +100,7 @@ export class CDBReader {
 	}
 
 	private readChunkHeader(): ChunkHeader {
-		this.readMagic(MAGIC.CHUNK_BEGIN, "CHUNK_BEGIN");
+		this.readMagic(Magic.CHUNK_BEGIN, "CHUNK_BEGIN");
 		const chunkSize = this.read32();
 		const chunkType = this.read32();
 		const flags = this.read32();
@@ -121,7 +115,7 @@ export class CDBReader {
 		}
 
 		this.readPadding();
-		this.readMagic(MAGIC.CHUNK_SEPARATOR, "CHUNK_SEPARATOR");
+		this.readMagic(Magic.CHUNK_SEPARATOR, "CHUNK_SEPARATOR");
 
 		return { chunkSize, chunkType, flags, description };
 	}
@@ -134,16 +128,16 @@ export class CDBReader {
 		let result: CDBChunk;
 
 		switch (header.chunkType) {
-			case CHUNK_TYPE.ROW_COUNT:
-			case CHUNK_TYPE.TABLE_ID:
-			case CHUNK_TYPE.TABLE_FLAGS:
-			case CHUNK_TYPE.DATABASE_FLAGS:
-			case CHUNK_TYPE.COLUMN_INDEX:
-			case CHUNK_TYPE.COLUMN_DATA_TYPE:
+			case ChunkType.ROW_COUNT:
+			case ChunkType.TABLE_ID:
+			case ChunkType.TABLE_FLAGS:
+			case ChunkType.DATABASE_FLAGS:
+			case ChunkType.COLUMN_INDEX:
+			case ChunkType.COLUMN_DATA_TYPE:
 				result = { type: header.chunkType, value: this.read32() };
 				break;
 
-			case CHUNK_TYPE.COLUMN_VALUES:
+			case ChunkType.COLUMN_VALUES:
 				{
 					const dataBytes = chunkEndPos - this.pos - 4;
 					const values: number[] = [];
@@ -154,7 +148,7 @@ export class CDBReader {
 				}
 				break;
 
-			case CHUNK_TYPE.COLUMN_BLOB_DATA:
+			case ChunkType.COLUMN_BLOB_DATA:
 				{
 					const sizedDataBytes = chunkEndPos - this.pos - 4;
 					result = {
@@ -164,16 +158,16 @@ export class CDBReader {
 				}
 				break;
 
-			case CHUNK_TYPE.DATABASE_TABLES:
+			case ChunkType.DATABASE_TABLES:
 				{
 					const tables = this.readArray(() => {
 						const tableChunk = this.readChunk();
 						const rowCount =
-							this.getRequiredChild<number>(tableChunk, CHUNK_TYPE.ROW_COUNT) ||
+							this.getRequiredChild<number>(tableChunk, ChunkType.ROW_COUNT) ||
 							0;
 						const columnDefinitions = this.getRequiredChild<ColumnDefinition[]>(
 							tableChunk,
-							CHUNK_TYPE.COLUMN_DEFINITIONS,
+							ChunkType.COLUMN_DEFINITIONS,
 						);
 						const columns: ColumnInfo[] = columnDefinitions.map((column) => ({
 							name: column.name,
@@ -192,11 +186,11 @@ export class CDBReader {
 							columns,
 							tableId: this.getRequiredChild<number>(
 								tableChunk,
-								CHUNK_TYPE.TABLE_ID,
+								ChunkType.TABLE_ID,
 							),
 							tableFlags: this.getRequiredChild<number>(
 								tableChunk,
-								CHUNK_TYPE.TABLE_FLAGS,
+								ChunkType.TABLE_FLAGS,
 							),
 						};
 					});
@@ -204,7 +198,7 @@ export class CDBReader {
 				}
 				break;
 
-			case CHUNK_TYPE.COLUMN_DEFINITIONS:
+			case ChunkType.COLUMN_DEFINITIONS:
 				{
 					const columns = this.readArray(() => {
 						const columnChunk = this.readChunk();
@@ -214,11 +208,11 @@ export class CDBReader {
 							name: colName,
 							type: this.getRequiredChild<DataType>(
 								columnChunk,
-								CHUNK_TYPE.COLUMN_DATA_TYPE,
+								ChunkType.COLUMN_DATA_TYPE,
 							),
 							columnIndex: this.getRequiredChild<number>(
 								columnChunk,
-								CHUNK_TYPE.COLUMN_INDEX,
+								ChunkType.COLUMN_INDEX,
 							),
 							columnChunk: columnChunk, // Store for later conversion
 						};
@@ -227,9 +221,9 @@ export class CDBReader {
 				}
 				break;
 
-			case CHUNK_TYPE.WRAPPER:
-			case CHUNK_TYPE.TABLE:
-			case CHUNK_TYPE.COLUMN:
+			case ChunkType.WRAPPER:
+			case ChunkType.TABLE:
+			case ChunkType.COLUMN:
 				{
 					const children: Record<number, unknown> = {};
 					while (this.pos < chunkEndPos) {
@@ -269,12 +263,12 @@ export class CDBReader {
 		}
 
 		this.readPadding();
-		this.readMagic(MAGIC.CHUNK_END, "CHUNK_END");
+		this.readMagic(Magic.CHUNK_END, "CHUNK_END");
 		return result;
 	}
 
 	private readArray<T>(itemReader: () => T): T[] {
-		this.readMagic(MAGIC.ARRAY_BEGIN, "ARRAY_BEGIN");
+		this.readMagic(Magic.ARRAY_BEGIN, "ARRAY_BEGIN");
 		const count = this.read32();
 		const items: T[] = [];
 
@@ -282,7 +276,7 @@ export class CDBReader {
 			items.push(itemReader());
 		}
 
-		this.readMagic(MAGIC.ARRAY_END, "ARRAY_END");
+		this.readMagic(Magic.ARRAY_END, "ARRAY_END");
 		return items;
 	}
 
@@ -292,26 +286,26 @@ export class CDBReader {
 	): ColumnData {
 		const dataType = this.getRequiredChild<DataType>(
 			columnChunk,
-			CHUNK_TYPE.COLUMN_DATA_TYPE,
+			ChunkType.COLUMN_DATA_TYPE,
 		);
 		const rawData =
-			(this.getChunkChildren(columnChunk)[CHUNK_TYPE.COLUMN_VALUES] as
+			(this.getChunkChildren(columnChunk)[ChunkType.COLUMN_VALUES] as
 				| number[]
 				| undefined) ?? [];
 		const sizedData =
-			(this.getChunkChildren(columnChunk)[CHUNK_TYPE.COLUMN_BLOB_DATA] as
+			(this.getChunkChildren(columnChunk)[ChunkType.COLUMN_BLOB_DATA] as
 				| Uint8Array
 				| undefined) ?? new Uint8Array([0, 0, 0, 0]);
 
 		// If no data, return array of zeros/empty strings based on type
 		if (rawData.length === 0 && rowCount !== undefined) {
 			switch (dataType) {
-				case DATA_TYPE.STRING:
+				case DataType.STRING:
 					return Array(rowCount).fill("");
-				case DATA_TYPE.FLOAT:
+				case DataType.FLOAT:
 					return Array(rowCount).fill(0.0);
-				case DATA_TYPE.FLOAT_LIST:
-				case DATA_TYPE.INTEGER_LIST:
+				case DataType.FLOAT_LIST:
+				case DataType.INTEGER_LIST:
 					return Array(rowCount).fill("()");
 				default:
 					return Array(rowCount).fill(0);
@@ -319,10 +313,10 @@ export class CDBReader {
 		}
 
 		switch (dataType) {
-			case DATA_TYPE.INTEGER:
+			case DataType.INTEGER:
 				return rawData.map((value) => value | 0);
 
-			case DATA_TYPE.BOOLEAN: {
+			case DataType.BOOLEAN: {
 				if (rowCount === undefined) {
 					throw new Error("Row count required for boolean type");
 				}
@@ -336,7 +330,7 @@ export class CDBReader {
 				return boolValues;
 			}
 
-			case DATA_TYPE.INTEGER_BYTE: {
+			case DataType.INTEGER_BYTE: {
 				const bytes = new Uint8Array(new Uint32Array(rawData).buffer).slice(
 					0,
 					rowCount,
@@ -344,7 +338,7 @@ export class CDBReader {
 				return Array.from(bytes, (b) => (b > 127 ? b - 256 : b));
 			}
 
-			case DATA_TYPE.INTEGER_SHORT: {
+			case DataType.INTEGER_SHORT: {
 				const bytes = new Uint8Array(new Uint32Array(rawData).buffer);
 				const int16Values: number[] = [];
 				for (let i = 0; i < rowCount; i++) {
@@ -354,7 +348,7 @@ export class CDBReader {
 				return int16Values;
 			}
 
-			case DATA_TYPE.FLOAT: {
+			case DataType.FLOAT: {
 				const view = new DataView(new ArrayBuffer(4));
 				return rawData.map((intValue) => {
 					view.setUint32(0, intValue, true);
@@ -362,15 +356,15 @@ export class CDBReader {
 				});
 			}
 
-			case DATA_TYPE.STRING:
+			case DataType.STRING:
 				return this.parseStrings(sizedData, rawData);
 
-			case DATA_TYPE.INTEGER_LIST:
+			case DataType.INTEGER_LIST:
 				return this.parseNumericLists(sizedData, rawData, (view, offset) => {
 					return view.getUint32(offset, true) | 0;
 				});
 
-			case DATA_TYPE.FLOAT_LIST:
+			case DataType.FLOAT_LIST:
 				return this.parseNumericLists(
 					sizedData,
 					rawData,

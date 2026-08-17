@@ -24,9 +24,4 @@ export type {
 } from "./types";
 
 export { ChunkType, DataType, Magic } from "./types";
-export {
-	CHUNK_TYPE,
-	DATA_TYPE,
-	MAGIC,
-	TABLE_FLAGS_BY_ID,
-} from "./tableMetadata";
+export { TABLE_FLAGS_BY_ID } from "./tableMetadata";
