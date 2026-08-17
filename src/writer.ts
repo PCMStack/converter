@@ -3,8 +3,7 @@
  * Handles writing of chunk hierarchy and data type encoding
  */
 
-import type { ChunkType, DataType } from "./types";
-import { CHUNK_TYPE, DATA_TYPE, MAGIC } from "./tableMetadata";
+import { ChunkType, DataType, Magic } from "./types";
 
 interface ChunkInfo {
 	type: ChunkType;
@@ -66,7 +65,7 @@ export class CDBWriter {
 	): void {
 		const chunkStart = this.pos;
 
-		this.write32(MAGIC.CHUNK_BEGIN);
+		this.write32(Magic.CHUNK_BEGIN);
 		this.write32(0); // placeholder for chunk size
 		this.write32(chunkType);
 		this.write32(0); // flags
@@ -82,7 +81,7 @@ export class CDBWriter {
 		}
 
 		this.writePadding();
-		this.write32(MAGIC.CHUNK_SEPARATOR);
+		this.write32(Magic.CHUNK_SEPARATOR);
 
 		this.chunkStack.push({ type: chunkType, startPos: chunkStart });
 	}
@@ -94,7 +93,7 @@ export class CDBWriter {
 		}
 
 		this.writePadding();
-		this.write32(MAGIC.CHUNK_END);
+		this.write32(Magic.CHUNK_END);
 
 		chunk.size = this.pos - chunk.startPos;
 		this.closedChunks.push(chunk);
@@ -120,16 +119,16 @@ export class CDBWriter {
 		const buffer = new ArrayBuffer(4);
 		const view = new DataView(buffer);
 
-		this.writeChunkOpen(CHUNK_TYPE.COLUMN_VALUES);
+		this.writeChunkOpen(ChunkType.COLUMN_VALUES);
 
 		switch (dataType) {
-			case DATA_TYPE.INTEGER:
+			case DataType.INTEGER:
 				for (const value of values as number[]) {
 					this.write32(value);
 				}
 				break;
 
-			case DATA_TYPE.BOOLEAN:
+			case DataType.BOOLEAN:
 				{
 					const numBytes = Math.ceil(values.length / 8);
 					for (let byteIdx = 0; byteIdx < numBytes; byteIdx++) {
@@ -146,7 +145,7 @@ export class CDBWriter {
 				}
 				break;
 
-			case DATA_TYPE.INTEGER_BYTE:
+			case DataType.INTEGER_BYTE:
 				{
 					(values as number[]).forEach((value) => {
 						this.ensureCapacity(1);
@@ -156,7 +155,7 @@ export class CDBWriter {
 				}
 				break;
 
-			case DATA_TYPE.INTEGER_SHORT:
+			case DataType.INTEGER_SHORT:
 				{
 					(values as number[]).forEach((value) => {
 						this.ensureCapacity(2);
@@ -166,7 +165,7 @@ export class CDBWriter {
 				}
 				break;
 
-			case DATA_TYPE.FLOAT:
+			case DataType.FLOAT:
 				{
 					(values as number[]).forEach((value) => {
 						view.setFloat32(0, parseFloat(String(value)), true);
@@ -175,12 +174,12 @@ export class CDBWriter {
 				}
 				break;
 
-			case DATA_TYPE.STRING:
+			case DataType.STRING:
 				this.writeStringData(values as string[]);
 				break;
 
-			case DATA_TYPE.INTEGER_LIST:
-			case DATA_TYPE.FLOAT_LIST:
+			case DataType.INTEGER_LIST:
+			case DataType.FLOAT_LIST:
 				this.writeListData(dataType, values as string[]);
 				break;
 		}
@@ -205,7 +204,7 @@ export class CDBWriter {
 
 		if (stringData.length > 0) {
 			this.writeChunkClose();
-			this.writeChunkOpen(CHUNK_TYPE.COLUMN_BLOB_DATA);
+			this.writeChunkOpen(ChunkType.COLUMN_BLOB_DATA);
 			this.write32(stringData.length);
 			this.writeBytes(new Uint8Array(stringData));
 		}
@@ -226,7 +225,7 @@ export class CDBWriter {
 			counts.push(elements.length);
 
 			elements.forEach((elem) => {
-				if (dataType === DATA_TYPE.INTEGER_LIST) {
+				if (dataType === DataType.INTEGER_LIST) {
 					listData.push(parseInt(elem, 10));
 				} else {
 					// FLOAT_LIST - store as uint32 bits
@@ -243,7 +242,7 @@ export class CDBWriter {
 
 		if (listData.length > 0) {
 			this.writeChunkClose();
-			this.writeChunkOpen(CHUNK_TYPE.COLUMN_BLOB_DATA);
+			this.writeChunkOpen(ChunkType.COLUMN_BLOB_DATA);
 			this.write32(listData.length * 4);
 			for (const value of listData) {
 				this.write32(value);

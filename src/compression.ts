@@ -3,7 +3,7 @@
  */
 
 import { deflate, inflate } from "pako";
-import { MAGIC } from "./tableMetadata";
+import { Magic } from "./types";
 
 function toUint8Array(data: ArrayBuffer | Uint8Array): Uint8Array {
 	return data instanceof Uint8Array ? data : new Uint8Array(data);
@@ -25,7 +25,7 @@ export function decompressCdb(data: ArrayBuffer | Uint8Array): ArrayBuffer {
 	const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
 
 	// Check if data is compressed (magic header)
-	if (view.getUint32(0, true) !== MAGIC.COMPRESSION_MAGIC) {
+	if (view.getUint32(0, true) !== Magic.COMPRESSION_MAGIC) {
 		return bytes.slice().buffer;
 	}
 
@@ -78,7 +78,7 @@ export function compressCdb(data: ArrayBuffer | Uint8Array): ArrayBuffer {
 	const result = new Uint8Array(12 + compressed.length);
 	const view = new DataView(result.buffer);
 
-	view.setUint32(0, MAGIC.COMPRESSION_MAGIC, true);
+	view.setUint32(0, Magic.COMPRESSION_MAGIC, true);
 	view.setUint32(4, uncompressedData.length, true);
 	view.setUint32(8, compressed.length, true);
 	result.set(compressed, 12);

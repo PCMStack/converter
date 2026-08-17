@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { compressCdb, decompressCdb } from "../src/compression";
 import { CDBReader } from "../src/reader";
-import { MAGIC } from "../src/tableMetadata";
+import { Magic } from "../src/types";
 import { CDBWriter } from "../src/writer";
 
 // Uncompressed passthrough test data
@@ -47,7 +47,7 @@ describe("compression", () => {
 		const compressed = compressCdb(cdbPayload.buffer);
 		const view = new DataView(compressed);
 
-		expect(view.getUint32(0, true)).toBe(MAGIC.COMPRESSION_MAGIC);
+		expect(view.getUint32(0, true)).toBe(Magic.COMPRESSION_MAGIC);
 
 		const decompressed = decompressCdb(compressed);
 		const originalBytes = new Uint8Array(cdbPayload.buffer);
@@ -69,7 +69,7 @@ describe("compression", () => {
 		const compressed = compressCdb(cdbPayload.buffer);
 		const view = new DataView(compressed);
 
-		expect(view.getUint32(0, true)).toBe(MAGIC.COMPRESSION_MAGIC);
+		expect(view.getUint32(0, true)).toBe(Magic.COMPRESSION_MAGIC);
 
 		const uncompressedSize = view.getUint32(4, true);
 		expect(uncompressedSize).toBe(cdbPayload.length);
@@ -83,7 +83,7 @@ describe("compression", () => {
 		const malformed = new Uint8Array(8);
 		const view = new DataView(malformed.buffer);
 
-		view.setUint32(0, MAGIC.COMPRESSION_MAGIC, true);
+		view.setUint32(0, Magic.COMPRESSION_MAGIC, true);
 
 		expect(() => decompressCdb(malformed)).toThrowError(
 			"Malformed compressed CDB: incomplete compression header",
@@ -94,7 +94,7 @@ describe("compression", () => {
 		const malformed = new Uint8Array(15);
 		const view = new DataView(malformed.buffer);
 
-		view.setUint32(0, MAGIC.COMPRESSION_MAGIC, true);
+		view.setUint32(0, Magic.COMPRESSION_MAGIC, true);
 		view.setUint32(4, cdbPayload.length, true);
 		view.setUint32(8, 8, true);
 
@@ -107,7 +107,7 @@ describe("compression", () => {
 		const malformed = new Uint8Array(16);
 		const view = new DataView(malformed.buffer);
 
-		view.setUint32(0, MAGIC.COMPRESSION_MAGIC, true);
+		view.setUint32(0, Magic.COMPRESSION_MAGIC, true);
 		view.setUint32(4, cdbPayload.length, true);
 		view.setUint32(8, 4, true);
 		malformed.set([0xde, 0xad, 0xbe, 0xef], 12);
