@@ -1,13 +1,13 @@
 # cdb-converter
 
 [![npm version](https://img.shields.io/npm/v/cdb-converter.svg)](https://www.npmjs.com/package/cdb-converter)
-[![CI](https://github.com/mpicciolli/cdb-converter/actions/workflows/ci.yml/badge.svg)](https://github.com/mpicciolli/cdb-converter/actions/workflows/ci.yml)
+[![CI](https://github.com/PCMStack/converter/actions/workflows/ci.yml/badge.svg)](https://github.com/PCMStack/converter/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/npm/l/cdb-converter.svg)](./LICENSE)
 [![Node.js](https://img.shields.io/node/v/cdb-converter.svg)](https://nodejs.org)
 
 Convert **Pro Cycling Manager CDB** database files to and from SQLite, straight from the command line or your own code. Lightweight, isomorphic (Node.js **and** the browser), and zero-configuration.
 
-The conversion is **lossless**: a full `cdb → sqlite → cdb` round-trip preserves every table, column, data type, and flag — so you can edit a save in any SQLite tool and load it back into the game. Optionally, it can reconstruct the save's relationships as real `PRIMARY KEY` / `FOREIGN KEY` constraints, turning the export into a normalized database you can explore with JOINs and ER-diagram tools.
+The conversion is **lossless**: a full `cdb → sqlite → cdb` round-trip preserves every table, column, data type, and flag — so you can edit a database in any SQLite tool and load it back into the game. Optionally, it can reconstruct the database relationships as real `PRIMARY KEY` / `FOREIGN KEY` constraints, turning the export into a normalized database you can explore with JOINs and ER-diagram tools.
 
 > [!NOTE]
 > Based on [agfor/pcmdbedit](https://github.com/agfor/pcmdbedit/) — many thanks to agfor for the foundational work.
@@ -53,7 +53,7 @@ npm install cdb-converter
 The fastest way to try it is the CLI:
 
 ```bash
-npx cdb-converter save.cdb
+npx cdb-converter database.cdb
 ```
 
 ## Command line
@@ -61,17 +61,17 @@ npx cdb-converter save.cdb
 The package ships a `cdb-converter` command. The conversion direction is auto-detected from the input file extension.
 
 ```bash
-# CDB → SQLite (default output: save.sqlite)
-npx cdb-converter save.cdb
+# CDB → SQLite (default output: database.sqlite)
+npx cdb-converter database.cdb
 
-# SQLite → CDB (default output: save.cdb)
-npx cdb-converter save.sqlite
+# SQLite → CDB (default output: database.cdb)
+npx cdb-converter database.sqlite
 
 # Provide an explicit output path (directories are created as needed)
-npx cdb-converter save.cdb data/save.sqlite
+npx cdb-converter database.cdb data/database.sqlite
 
 # Reconstruct PRIMARY KEY / FOREIGN KEY constraints (CDB → SQLite only)
-npx cdb-converter save.cdb save.sqlite --normalize
+npx cdb-converter database.cdb database.sqlite --normalize
 
 # Help / version
 npx cdb-converter --help
@@ -83,10 +83,10 @@ npx cdb-converter --version
 | `.cdb`            | CDB → SQLite | `<input>.sqlite` |
 | `.sqlite` / `.db` | SQLite → CDB | `<input>.cdb`    |
 
-| Option              | Effect                                                                                             |
-| ------------------- | -------------------------------------------------------------------------------------------------- |
-| `-n`, `--normalize` | (CDB → SQLite only) reconstruct PK/FK constraints from PCM naming conventions. See [Normalized schema](#normalized-schema). |
-| `--index-fk`        | Implies `--normalize`; also indexes every FK column for faster JOINs (roughly doubles output size). |
+| Option              | Effect                                                                                                                                                                 |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `-n`, `--normalize` | (CDB → SQLite only) reconstruct PK/FK constraints from PCM naming conventions. See [Normalized schema](#normalized-schema).                                            |
+| `--index-fk`        | Implies `--normalize`; also indexes every FK column for faster JOINs (roughly doubles output size).                                                                    |
 | `--precise-types`   | (CDB → SQLite only) preserve the exact CDB type (BOOLEAN, INTEGER_BYTE, INTEGER_SHORT) instead of collapsing it to plain INTEGER. See [Compatibility](#compatibility). |
 
 ## Library usage
@@ -101,7 +101,7 @@ import { cdbToSql } from "cdb-converter";
 const SQL = await initSqlJs();
 
 // Read and convert a CDB file
-const cdbBuffer = fs.readFileSync("save.cdb");
+const cdbBuffer = fs.readFileSync("database.cdb");
 const db = cdbToSql(cdbBuffer, SQL);
 
 // Query it like any SQLite database
@@ -109,7 +109,7 @@ const result = db.exec("SELECT * FROM Teams LIMIT 5");
 console.log(result[0].values);
 
 // Export to a .sqlite file
-fs.writeFileSync("save.sqlite", db.export());
+fs.writeFileSync("database.sqlite", db.export());
 ```
 
 > [!IMPORTANT]
@@ -155,11 +155,11 @@ import { sqlToCdb } from "cdb-converter";
 const SQL = await initSqlJs();
 
 // Load a SQLite database and convert back to CDB
-const sqliteBuffer = fs.readFileSync("save.sqlite");
+const sqliteBuffer = fs.readFileSync("database.sqlite");
 const db = new SQL.Database(sqliteBuffer);
 
 const cdbBuffer = sqlToCdb(db); // automatically compressed
-fs.writeFileSync("save.cdb", Buffer.from(cdbBuffer));
+fs.writeFileSync("database.cdb", Buffer.from(cdbBuffer));
 ```
 
 ### Compression
@@ -251,7 +251,7 @@ CREATE TABLE DB_STRUCTURE (TableName '274', ID '0')
 CREATE TABLE DB_STRUCTURE (TableName TEXT '274', ID INTEGER, Flags INTEGER)
 ```
 
-Column indices and data types are encoded into each column's declared type annotation, so `cdb → sqlite → cdb` preserves every row value even when the SQLite database is saved to disk and reopened in a separate process. How much of the *schema* survives depends on the mode: `preciseTypes: true` round-trips the CDB types and table flags exactly, while the default trades some of that fidelity for interop. By default, CDB's narrower integer types (`BOOLEAN`, `INTEGER_BYTE`, `INTEGER_SHORT`) are encoded as plain `INTEGER`, and each table's flags (their exact meaning is unknown but must be preserved) are **not** written to the `.sqlite` file — `sqlToCdb` falls back to a static table of flags extracted from official PCM saves (`TABLE_FLAGS_BY_ID`) instead. Pass `{ preciseTypes: true }` (`--precise-types` on the CLI) to encode the exact CDB type and store each table's real flags in the `Flags` column instead of relying on that fallback.
+Column indices and data types are encoded into each column's declared type annotation, so `cdb → sqlite → cdb` preserves every row value even when the SQLite database is saved to disk and reopened in a separate process. How much of the _schema_ survives depends on the mode: `preciseTypes: true` round-trips the CDB types and table flags exactly, while the default trades some of that fidelity for interop. By default, CDB's narrower integer types (`BOOLEAN`, `INTEGER_BYTE`, `INTEGER_SHORT`) are encoded as plain `INTEGER`, and each table's flags (their exact meaning is unknown but must be preserved) are **not** written to the `.sqlite` file — `sqlToCdb` falls back to a static table of flags extracted from official PCM saves (`TABLE_FLAGS_BY_ID`) instead. Pass `{ preciseTypes: true }` (`--precise-types` on the CLI) to encode the exact CDB type and store each table's real flags in the `Flags` column instead of relying on that fallback.
 
 This default exists specifically for interop: the official PCM `SQLiteExporter` tool only recognizes `FLOAT`, `STRING` and the two list types in this metadata and has no `Flags` column — a `.sqlite` written with `preciseTypes: true` crashes it on import. Leave `preciseTypes` off if you need the output to be re-importable by that tool; turn it on if `cdb-converter` (via `sqlToCdb`) is the only tool that will ever read the file back and you want the extra fidelity.
 
@@ -275,11 +275,11 @@ A full `cdb → sqlite → cdb` round-trip on a real ~60k-row database stays wel
 
 Normalization is opt-in and costs only what you ask for (measured against the default conversion, ~60k rows):
 
-| Mode                                          | Conversion time | Output size |
-| --------------------------------------------- | --------------- | ----------- |
-| Default (flat)                                | baseline        | baseline    |
-| `normalize`                                   | +~10%           | +~40%       |
-| `normalize` + `indexForeignKeys`              | +~40%           | +~130%      |
+| Mode                             | Conversion time | Output size |
+| -------------------------------- | --------------- | ----------- |
+| Default (flat)                   | baseline        | baseline    |
+| `normalize`                      | +~10%           | +~40%       |
+| `normalize` + `indexForeignKeys` | +~40%           | +~130%      |
 
 See **[bench/README.md](bench/README.md)** for the full per-fixture numbers, the bundle breakdown, and how to reproduce them (`npm run bench`).
 

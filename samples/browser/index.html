@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<title>cdb-converter</title>
+		<title>cdb-converter: PCMStack</title>
 		<link
 			rel="stylesheet"
 			href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
@@ -13,8 +13,9 @@
 	<body>
 		<main class="demo">
 			<header class="page-header">
+				<p class="page-header__eyebrow">PCMStack</p>
 				<h1 class="page-header__title">cdb-converter</h1>
-				<p class="page-header__subtitle">Convert Pro Cycling Manager save files to SQLite in one line.</p>
+				<p class="page-header__subtitle">Convert any Pro Cycling Manager database to SQLite in one line.</p>
 				<div class="badge-list">
 					<span class="badge-list__item">MIT</span>
 					<span class="badge-list__item">ESM + CJS</span>
@@ -32,6 +33,10 @@
 
 			<section>
 				<p class="section__label">Try it</p>
+				<p class="privacy-note">
+					Everything runs in your browser. Your database is never uploaded: it is
+					read, converted and downloaded entirely on this machine.
+				</p>
 				<label id="dropzone" class="dropzone" for="cdb-file" data-has-file="false">
 					<svg class="dropzone__icon" viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
 						<rect x="4" y="6" width="20" height="26" rx="3" />
@@ -101,8 +106,8 @@
 			</section>
 			<footer>
 				<nav class="footer__nav">
-					<a class="footer__link" href="https://github.com/mpicciolli/cdb-converter" rel="noopener noreferrer" target="_blank">GitHub</a>
-					<a class="footer__link" href="https://github.com/mpicciolli/cdb-converter/blob/main/LICENSE" rel="noopener noreferrer" target="_blank">License</a>
+					<a class="footer__link" href="https://github.com/PCMStack/converter" rel="noopener noreferrer" target="_blank">GitHub</a>
+					<a class="footer__link" href="https://github.com/PCMStack/converter/blob/main/LICENSE" rel="noopener noreferrer" target="_blank">License</a>
 				</nav>
 			</footer>
 		</main>
