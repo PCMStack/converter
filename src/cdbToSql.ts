@@ -128,6 +128,9 @@ export function cdbToSql(
 	const tables =
 		(wrapperChildren[ChunkType.DATABASE_TABLES] as TableInfo[] | undefined) ??
 		[];
+	const databaseFlags = wrapperChildren[ChunkType.DATABASE_FLAGS] as
+		| number
+		| undefined;
 
 	// DB_STRUCTURE mirrors the PCM convention used by sqlToCdb: TableName keeps the
 	// literal type annotation '274' so the schema matches the metadata table shape
@@ -145,6 +148,18 @@ export function cdbToSql(
 			? `CREATE TABLE DB_STRUCTURE (TableName TEXT '274', ID INTEGER, Flags INTEGER)`
 			: `CREATE TABLE DB_STRUCTURE (TableName '274',ID '0')`,
 	);
+
+	// DATABASE_FLAGS is a single scalar for the whole file (unlike per-table
+	// TABLE_FLAGS), so it doesn't fit in DB_STRUCTURE; it gets its own tiny
+	// table instead. Written in both modes (unlike DB_STRUCTURE.Flags): an
+	// extra, unrecognized table doesn't trip up the official SQLiteExporter
+	// tool the way extra/typed DB_STRUCTURE columns do, so there's no interop
+	// cost to keeping this value exact by default too. sqlToCdb falls back to
+	// the highest table ID when it's absent (e.g. a hand-built SQLite database).
+	if (databaseFlags !== undefined) {
+		db.run(`CREATE TABLE DB_METADATA (DatabaseFlags INTEGER)`);
+		db.run(`INSERT INTO DB_METADATA VALUES (?)`, [databaseFlags]);
+	}
 
 	const keyMap = options?.normalize ? inferKeys(tables) : null;
 	const tablesByName = new Map(tables.map((t) => [t.name, t]));

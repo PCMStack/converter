@@ -16,7 +16,8 @@
 import { readFileSync } from "node:fs";
 import initSqlJs from "sql.js";
 import { beforeAll, describe, expect, it } from "vitest";
-import { cdbToSql, sqlToCdb } from "../src/index";
+import { CDBReader, cdbToSql, decompressCdb, sqlToCdb } from "../src/index";
+import { ChunkType } from "../src/types";
 import type { SqlDatabase, SqlJsStatic } from "../src/types";
 import { saveFixtures } from "./fixtures/save.fixture";
 
@@ -67,6 +68,15 @@ function snapshot(db: SqlDatabase): TableSnapshot[] {
 
 		return { name, id, flags, columns, rows };
 	});
+}
+
+/** Reads the file-level DATABASE_FLAGS scalar straight from raw CDB bytes. */
+function readDatabaseFlags(
+	cdbData: Uint8Array | ArrayBuffer,
+): number | undefined {
+	const reader = new CDBReader(decompressCdb(cdbData));
+	const wrapper = reader.readChunk();
+	return wrapper.children?.[ChunkType.DATABASE_FLAGS] as number | undefined;
 }
 
 describe("cdb <-> sql round-trip (no data loss)", () => {
@@ -152,6 +162,49 @@ describe("cdb <-> sql round-trip (no data loss)", () => {
 				db1.close();
 				db2.close();
 				db3.close();
+			}
+		},
+		15000,
+	);
+
+	it.each(saveFixtures)(
+		"preserves the file-level DATABASE_FLAGS scalar with preciseTypes for %s",
+		(_label, fixturePath) => {
+			const original = readFileSync(fixturePath);
+			const before = readDatabaseFlags(original);
+
+			const db1 = cdbToSql(original, SQL, { preciseTypes: true });
+			const db2 = new SQL.Database(db1.export()) as SqlDatabase;
+			const after = readDatabaseFlags(sqlToCdb(db2));
+
+			try {
+				expect(after).toBe(before);
+			} finally {
+				db1.close();
+				db2.close();
+			}
+		},
+		15000,
+	);
+
+	it.each(saveFixtures)(
+		"preserves the file-level DATABASE_FLAGS scalar by default (official-compatible schema) for %s",
+		(_label, fixturePath) => {
+			const original = readFileSync(fixturePath);
+			const before = readDatabaseFlags(original);
+
+			// DB_METADATA is a table SQLiteExporter doesn't recognize, unlike the
+			// typed/extra DB_STRUCTURE columns that crash it, so it's written in
+			// both modes — this asserts the default (non-preciseTypes) path too.
+			const db1 = cdbToSql(original, SQL);
+			const db2 = new SQL.Database(db1.export()) as SqlDatabase;
+			const after = readDatabaseFlags(sqlToCdb(db2));
+
+			try {
+				expect(after).toBe(before);
+			} finally {
+				db1.close();
+				db2.close();
 			}
 		},
 		15000,
