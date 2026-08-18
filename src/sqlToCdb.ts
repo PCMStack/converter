@@ -72,9 +72,8 @@ export function sqlToCdb(db: SqlDatabase): ArrayBuffer {
 		flags: hasFlagsColumn ? (row[2] as number | null) : null,
 	}));
 
-	// DB_METADATA only exists when the .sqlite was produced with preciseTypes;
-	// otherwise fall back to the highest table ID, which matches the real
-	// DATABASE_FLAGS value in every known PCM save except one (off by one).
+	// DB_METADATA may be absent (e.g. a hand-built .sqlite that never went through
+	// cdbToSql), so fall back to the highest table ID when it isn't available.
 	const metadataInfo = db.exec(`PRAGMA table_info("DB_METADATA")`);
 	const hasMetadataTable =
 		metadataInfo.length > 0 &&
