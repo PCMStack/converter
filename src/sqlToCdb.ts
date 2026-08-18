@@ -72,6 +72,21 @@ export function sqlToCdb(db: SqlDatabase): ArrayBuffer {
 		flags: hasFlagsColumn ? (row[2] as number | null) : null,
 	}));
 
+	// DB_METADATA may be absent (e.g. a hand-built .sqlite that never went through
+	// cdbToSql), so fall back to the highest table ID when it isn't available.
+	const metadataInfo = db.exec(`PRAGMA table_info("DB_METADATA")`);
+	const hasMetadataTable =
+		metadataInfo.length > 0 &&
+		metadataInfo[0].values.some((row) => row[1] === "DatabaseFlags");
+	const storedDatabaseFlags = hasMetadataTable
+		? (db.exec(`SELECT DatabaseFlags FROM DB_METADATA`)[0]?.values[0]?.[0] as
+				| number
+				| undefined)
+		: undefined;
+	const databaseFlags =
+		storedDatabaseFlags ??
+		(tables.length > 0 ? Math.max(...tables.map((t) => t.id)) : 274);
+
 	const pageCountResult = db.exec(`PRAGMA page_count`);
 	const pageSizeResult = db.exec(`PRAGMA page_size`);
 	const pageCount = Number(pageCountResult[0]?.values[0]?.[0]);
@@ -84,7 +99,7 @@ export function sqlToCdb(db: SqlDatabase): ArrayBuffer {
 
 	writer.writeChunkOpen(ChunkType.WRAPPER, "cyanide database");
 	writer.writeChunkOpen(ChunkType.DATABASE_FLAGS);
-	writer.write32(274);
+	writer.write32(databaseFlags);
 	writer.writeChunkClose();
 
 	writer.writeChunkOpen(ChunkType.DATABASE_TABLES);

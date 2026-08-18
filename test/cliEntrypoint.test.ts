@@ -10,7 +10,7 @@ import {
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 /**
@@ -58,6 +58,7 @@ beforeAll(async () => {
 	execFileSync(npmCommand, ["run", "build"], {
 		cwd: repoRoot,
 		stdio: "ignore",
+		shell: isWindows,
 	});
 
 	workDir = await mkdtemp(join(tmpdir(), "cdb-converter-cli-"));
@@ -117,7 +118,7 @@ describe("CLI imported as a library", () => {
 		const importer = join(workDir, "importer.mjs");
 		await writeFile(
 			importer,
-			`import { run } from ${JSON.stringify(cliPath)};\n` +
+			`import { run } from ${JSON.stringify(pathToFileURL(cliPath).href)};\n` +
 				`console.log(typeof run);\n`,
 		);
 
