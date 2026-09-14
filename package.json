@@ -58,7 +58,7 @@
 		"sql.js": "^1.14.1"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.5.8",
+		"@biomejs/biome": "2.5.12",
 		"@types/node": "^22.20.0",
 		"@types/pako": "^3.0.0",
 		"@types/sql.js": "^1.4.11",
